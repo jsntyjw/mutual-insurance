@@ -1,19 +1,15 @@
-## Foundry
+## 合约地址：
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+0x58B1e6F7BC643bA1898d88AE2404050D19D3797a
 
-Foundry consists of:
+## 部署：
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
 
-## Documentation
+```shell
+$ forge script script/DeployUnemploymentInsurance.s.sol:DeployUnemploymentInsurance --rpc-url sepolia（在foundry.toml里面设置好的） --account deployer111（使用cast wallet import deployer111 --interactive 设置好的） --broadcast -vvv
+```
 
-https://book.getfoundry.sh/
 
-## Usage
 
 ### Build
 
