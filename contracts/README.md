@@ -1,8 +1,10 @@
-## 安装依赖库如openzeppelin：
+## ~~安装依赖库如openzeppelin：~~ 解决了！不用安装直接用就好了
+
+
+## 进入合约文件夹路径
+
 ```shell
-$ forge update
-forge install OpenZeppelin/openzeppelin-contracts --no-commit
-forge install foundry-rs/forge-std --no-commit
+$ cd .\contracts\
 ```
 
 ## 编译
@@ -11,11 +13,15 @@ forge install foundry-rs/forge-std --no-commit
 $ forge build
 ```
 
+
+
 ## 测试
 
 ```shell
 $ forge test -vvv
 ```
+
+
 
 ## 部署
 
@@ -23,6 +29,8 @@ $ forge test -vvv
 
 ##### Sepolia：
 0x58B1e6F7BC643bA1898d88AE2404050D19D3797a
+
+
 
 ### 本地测试节点部署：
 
@@ -50,6 +58,7 @@ $ cast call <部署好的合约地址> "calculatePayout(uint)" 10000
 ```
 
 
+
 ### 公开网络部署：
 
 #### Linux/MacOS
@@ -61,7 +70,7 @@ $ forge script script/DeployUnemploymentInsurance.s.sol:DeployUnemploymentInsura
     --broadcast -vvv
     
 # --private-key 可以由
-# --account <使用cast wallet import deployer111 --interactive 提前设置好私钥的账号>
+# --account <提前用cast wallet import deployer111 --interactive 设置的私钥账户>
 # 来代替
 
 ```
@@ -75,7 +84,7 @@ $ forge script script/DeployUnemploymentInsurance.s.sol:DeployUnemploymentInsura
     --broadcast -vvv
     
 # --private-key 可以由
-# --account <使用cast wallet import deployer111 --interactive 提前设置好私钥的账号>
+# --account <提前用cast wallet import deployer111 --interactive 设置的私钥账户>
 # 来代替
 
 ```
@@ -107,4 +116,11 @@ $ forge snapshot
 $ forge --help
 $ anvil --help
 $ cast --help
+```
+
+
+## 万一需要重新安装依赖库如openzeppelin：
+```shell
+    $ forge install OpenZeppelin/openzeppelin-contracts --no-commit
+    $ forge install foundry-rs/forge-std --no-commit
 ```
