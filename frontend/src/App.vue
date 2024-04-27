@@ -4,6 +4,7 @@ import { ref, onMounted } from 'vue';
 import Web3 from 'web3';
 import { web3Provider } from './utils/web3Provider'; // Assumed global state for Web3
 import Login from './view/Login.vue';
+import HR from './view/HR.vue';
 import ChangeTheme from './components/ChangeTheme.vue';
 
 // Reactive references for account and web3 instance
@@ -76,7 +77,8 @@ const navBarStatus = computed(()=>{
 
     </div>
 <!--    <Main></Main>-->
-    <Login></Login>
+<!--    <Login></Login>-->
+    <HR></HR>
   </div>
 
 </template>
