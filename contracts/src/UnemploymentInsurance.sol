@@ -1,11 +1,14 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
-import "../lib/openzeppelin-contracts/contracts/access/Ownable.sol";
+// import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract UnemploymentInsurance is Ownable {
+// contract UnemploymentInsurance is Ownable {
+contract UnemploymentInsurance {
+    address private _owner;
+
     struct Employee {
-        bytes32 nameHash;
+        string emploeeName;
         string emailAddress;
         string nric;
         uint256 monthlySalary;
@@ -36,8 +39,14 @@ contract UnemploymentInsurance is Ownable {
 
 
 
-    constructor() Ownable(msg.sender) { }
-
+    // constructor() Ownable(msg.sender) { }
+    constructor() {
+        _owner = msg.sender;
+    }
+    modifier onlyOwner(){
+        require(_owner == msg.sender, "Only the owner of the contract can add company");
+        _;
+    }
 
     // Function to register a company
     function registerCompany(string memory companyName, address hrWallet) public onlyOwner {
@@ -50,13 +59,13 @@ contract UnemploymentInsurance is Ownable {
     }
 
     // Function to register an employee
-    function registerEmployee(string memory companyName, uint salary, bytes32 employeeNameHash, string memory emailAddress, string memory nric) public {
+    function registerEmployee(string memory companyName, uint salary, string memory employeeName, string memory emailAddress, string memory nric) public {
         require(bytes(companyName).length > 0, "Company name cannot be empty");
         require(salary > 0, "Salary must be greater than zero");
         bytes32 companyNameHash = generateNameHash(companyName);
         Company storage company = companiesByHash[companyNameHash];
         company.employeeAddresses.push(msg.sender);
-        employees[msg.sender] = Employee(employeeNameHash, emailAddress, nric, salary, determineContribution(salary), new uint[](0), 0, 0, 0);
+        employees[msg.sender] = Employee(employeeName, emailAddress, nric, salary, determineContribution(salary), new uint[](0), 0, 0, 0);
         emit EmployeeRegistered(msg.sender, companyName);
     }
 
@@ -72,7 +81,7 @@ contract UnemploymentInsurance is Ownable {
 
     // Function to pay premium
     function payPremium(uint months) public payable {
-        checkAndUpdateStatus(msg.sender);
+        checkPaymentOverdue(msg.sender);
         Employee storage employee = employees[msg.sender];
         require(employee.status != 4, "Already claimed or exited!");
         require(employee.status != 0, "Registration not confirmed yet!");
@@ -83,21 +92,31 @@ contract UnemploymentInsurance is Ownable {
             employee.paymentTimestamps.push(block.timestamp);
         }
         employee.monthsPaid += months;
-        if (employee.monthsPaid >= 3){
-            employee.status = 2;
-            emit EmployeeStatusChanged(msg.sender, employee.status);
-        }
+        updateEligibilityForCompensation(msg.sender);
         emit PremiumPaid(msg.sender, msg.value, block.timestamp);
     }
 
+
+    function updateEligibilityForCompensation(address employeeAddress) public {
+        Employee storage employee = employees[employeeAddress];
+        require(employee.status != 4, "Already claimed or exited!");
+        if (employee.monthsPaid >= 3 && block.timestamp > employee.verifiedTimestamp + 3 *30 days){
+            employee.status = 2;
+            emit EmployeeStatusChanged(msg.sender, employee.status);
+        }
+    }
+
+
     // Function to submit a claim
     function submitClaim() public {
-        checkAndUpdateStatus(msg.sender);
+        updateEligibilityForCompensation(msg.sender);
+        checkPaymentOverdue(msg.sender);
         Employee storage employee = employees[msg.sender];
         require(employee.status != 4, "Already claimed or exited!");
         require(employee.status != 0, "Registration not confirmed yet!");
-        require(employee.status != 1, "Not enough monthly payments made!");
+        require(employee.status != 1, "Not enough monthly payments made or not enough time after enrolled!");
         require(employee.status != 3, "Claim request already made, pending approval!");
+        // require(block.timestamp > employee.verifiedTimestamp + 3 *30 days, "Claim request must be made 3 months after registration!");
         require(employee.status == 2, "Not eligible to claim yet!");
         employee.status = 3;    // Set status to Claim submitted
         emit EmployeeStatusChanged(msg.sender, employee.status);
@@ -151,7 +170,7 @@ contract UnemploymentInsurance is Ownable {
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Helper functions <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     // Helper function to check if the employ has exceeded the 3 month limit after last payment before each action
-    function checkAndUpdateStatus(address employeeAddress) public {
+    function checkPaymentOverdue(address employeeAddress) public {
         Employee storage employee = employees[employeeAddress];
         if (block.timestamp > employee.verifiedTimestamp + employee.monthsPaid * 30 days + 3 *30 days) {
             employee.status = 4;    // Set status to claimed or exited due to non-payment
