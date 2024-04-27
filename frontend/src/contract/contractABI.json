@@ -89,11 +89,6 @@
 	{
 		"inputs": [
 			{
-				"internalType": "string",
-				"name": "companyName",
-				"type": "string"
-			},
-			{
 				"internalType": "address",
 				"name": "employeeAddress",
 				"type": "address"
@@ -427,13 +422,7 @@
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "userAddress",
-				"type": "address"
-			}
-		],
+		"inputs": [],
 		"name": "getAddressIdentity",
 		"outputs": [
 			{

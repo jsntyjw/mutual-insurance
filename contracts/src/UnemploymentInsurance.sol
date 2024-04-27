@@ -81,8 +81,8 @@ contract UnemploymentInsurance {
     }
 
     // Function to confirm employment status by HR
-    function confirmEmploymentStatus(string memory companyName, address employeeAddress) public {
-        bytes32 companyNameHash = generateNameHash(companyName);
+    function confirmEmploymentStatus(address employeeAddress) public {
+        bytes32 companyNameHash = hrWallets[msg.sender];
         require(msg.sender == companiesByHash[companyNameHash].hrWallet, "Only HR can confirm employment status.");
         Employee storage employee = employees[employeeAddress];
         employee.status = 1;    // Set status to Confirmed but not enough payments
@@ -182,11 +182,11 @@ contract UnemploymentInsurance {
     }
 
     // View funtion to get the address's identity (employee or hr)
-    function  getAddressIdentity(address userAddress) public view returns (string memory) {
-        if (hrWallets[userAddress] == 0x0000000000000000000000000000000000000000000000000000000000000000) {
+    function  getAddressIdentity() public view returns (string memory) {
+        if (hrWallets[msg.sender] == 0x0000000000000000000000000000000000000000000000000000000000000000) {
             return "employee";
         } else {
-            bytes32 companyNameHash = hrWallets[userAddress];
+            bytes32 companyNameHash = hrWallets[msg.sender];
             string memory companyName = companiesByHash[companyNameHash].companyName;
             return companyName;
         }
