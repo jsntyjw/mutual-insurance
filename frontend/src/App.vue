@@ -65,8 +65,8 @@ const navBarStatus = computed(()=>{
 <template>
 <!--  <HelloWorld msg="Vite + Vue" />-->
   <div>
-    <div :class="[navBarStatus === 'not yet'? 'bg-opacity-0 text-primary-content' : 'bg-base-300 text-base-content']" class=" h-12 flex justify-between items-center px-5">
-      <div>
+    <div :class="[navBarStatus === 'not yet'? 'bg-opacity-0 text-primary-content' : 'bg-base-300 text-base-content']" class="overflow-auto h-12 flex justify-between items-center px-5">
+      <div  class="whitespace-nowrap">
         Account: {{ account }}
       </div>
       <div>

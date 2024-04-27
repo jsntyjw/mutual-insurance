@@ -1,7 +1,7 @@
 <template>
   <div title="Change Theme" class="dropdown dropdown-end">
     <div tabindex="0" class="btn gap-1 normal-case btn-ghost btn-sm" @click="setBlur()" @blur="handleBlur()">
-      <span class="hidden md:inline text-md">{{ 'THEME' }}</span>
+      <span class="inline text-md">{{ 'THEME' }}</span>
     </div>
     <div
       :class="[isOpac?'opacity-0-imp':'']"
