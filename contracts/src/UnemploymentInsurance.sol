@@ -181,6 +181,17 @@ contract UnemploymentInsurance {
         }
     }
 
+    // View funtion to get all employee information by company name
+    function getAllEmployeeByCompanyName(string memory companyName) public view returns (Employee[] memory) {
+        bytes32 companyNameHash = generateNameHash(companyName);
+        Company storage company = companiesByHash[companyNameHash];
+        Employee[] memory employeeByCompanyName = new Employee[](company.employeeAddresses.length);
+        for (uint i = 0; i < company.employeeAddresses.length; i++) {
+            employeeByCompanyName[i] =  employees[company.employeeAddresses[i]];
+        }
+        return employeeByCompanyName;
+     }
+
 
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Helper functions <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
