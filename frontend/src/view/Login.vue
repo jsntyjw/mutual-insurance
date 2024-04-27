@@ -115,9 +115,7 @@ function handleSubmit() {
 
 <script setup>
 import { reactive, onMounted } from 'vue'
-import { web3Provider } from '../utils/web3Provider.js' // Import your web3Provider
-import { contractAddress } from '../contract/contractConstants.js'
-import contractABI from '../contract/contractABI.json'
+import { web3Provider,contract } from '../utils/web3Provider.js' // Import your web3Provider
 
 
 const inputForm = reactive({
@@ -133,36 +131,8 @@ const inputForm = reactive({
 
 
 // Initialize contract instance
-const contract = new web3Provider.web3.eth.Contract(contractABI, contractAddress)
 
 // Function to check if employee is already registered
-async function checkEmployeeRegistered() {
-  try {
-    // Get connected wallet address
-    const accounts = await web3Provider.web3.eth.requestAccounts()
-    const connectedWalletAddress = accounts[0]
-    console.log(1)
-
-    // Check if employee is registered
-    const userType = await contract.methods.getAddressIdentity(connectedWalletAddress).call()
-    if (userType === 'employee') {
-      console.log('user type is employee')
-      const employeeInfo = await contract.methods.getEmployeeInfo(connectedWalletAddress).call()
-      if (employeeInfo["emailAddress"]) {
-        console.log('Employee already registered')
-      } else {
-        console.log('Employee not registered')
-      }
-      // Do something if employee is already registered, like displaying a message
-    } else {
-      console.log('connect wallet address is HR')
-      // Register the employee using the provided information
-      // await registerEmployee()
-    }
-  } catch (error) {
-    console.error('Error checking employee registration:', error)
-  }
-}
 
 // Function to register employee
 async function handleSubmit() {
@@ -175,7 +145,7 @@ async function handleSubmit() {
     const accounts = await web3Provider.web3.eth.requestAccounts()
     const connectedWalletAddress = accounts[0]
 
-    await contract.methods.registerEmployee(company, salary, name, email, NRIC).send({ from: connectedWalletAddress })
+    await contract.data.methods.registerEmployee(company, salary, name, email, NRIC).send({ from: connectedWalletAddress })
 
     console.log('Employee registered successfully')
     // Do something after successful registration, like displaying a success message
@@ -192,14 +162,5 @@ async function handleSubmit() {
 //   checkEmployeeRegistered()
 // }
 
-// Execute checkEmployeeRegistered function when the component is mounted
-onMounted(() => {
-  // Check if wallet is connected
-  // console.log(web3Provider.web3, web3Provider.web3.eth.defaultAccount)
-  if (web3Provider.web3) {
-    // Wallet is connected, check if employee is registered 
-    checkEmployeeRegistered()
-  }
-})
 
 </script>
