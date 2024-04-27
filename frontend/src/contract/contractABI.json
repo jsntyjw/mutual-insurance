@@ -336,6 +336,11 @@
 		"name": "employees",
 		"outputs": [
 			{
+				"internalType": "address",
+				"name": "walletAddress",
+				"type": "address"
+			},
+			{
 				"internalType": "string",
 				"name": "emploeeName",
 				"type": "string"
@@ -373,6 +378,11 @@
 			{
 				"internalType": "uint256",
 				"name": "verifiedTimestamp",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "registerTimestamp",
 				"type": "uint256"
 			}
 		],
@@ -418,17 +428,16 @@
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "companyName",
-				"type": "string"
-			}
-		],
+		"inputs": [],
 		"name": "getAllEmployeeByCompanyName",
 		"outputs": [
 			{
 				"components": [
+					{
+						"internalType": "address",
+						"name": "walletAddress",
+						"type": "address"
+					},
 					{
 						"internalType": "string",
 						"name": "emploeeName",
@@ -472,6 +481,11 @@
 					{
 						"internalType": "uint256",
 						"name": "verifiedTimestamp",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "registerTimestamp",
 						"type": "uint256"
 					}
 				],
@@ -537,6 +551,11 @@
 			{
 				"components": [
 					{
+						"internalType": "address",
+						"name": "walletAddress",
+						"type": "address"
+					},
+					{
 						"internalType": "string",
 						"name": "emploeeName",
 						"type": "string"
@@ -579,6 +598,11 @@
 					{
 						"internalType": "uint256",
 						"name": "verifiedTimestamp",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "registerTimestamp",
 						"type": "uint256"
 					}
 				],
