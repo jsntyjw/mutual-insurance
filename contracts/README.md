@@ -1,3 +1,8 @@
+## 安装依赖库如openzeppelin：
+```shell
+$ forge update
+```
+
 ## 编译
 
 ```shell

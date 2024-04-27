@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "../src/UnemploymentInsurance.sol";
@@ -33,23 +33,23 @@ contract UnemploymentInsuranceTest is Test {
 
         // employee 1
         uint salary1 = 3000; // Corresponds with a $40 contribution per month
-        bytes32 employeeNameHash1 = keccak256("employee1");
+        string memory employeeName1 = "employee1";
         string memory emailAddress1 = "employee1@example.com";
         string memory nric1 = "S1234567D";
 
         // Register employees
         vm.prank(employeeWallet1);
-        insuranceContract.registerEmployee(companyName, salary1, employeeNameHash1, emailAddress1, nric1);
+        insuranceContract.registerEmployee(companyName, salary1, employeeName1, emailAddress1, nric1);
 
         // employee 2
         uint salary2 = 7000; // Corresponds with a $60 contribution per month
-        bytes32 employeeNameHash2 = keccak256("employee2");
+        string memory employeeName2 = "employee2";
         string memory emailAddress2 = "employee2@example.com";
         string memory nric2 = "S1234567F";
 
         // Register employees
         vm.prank(employeeWallet2);
-        insuranceContract.registerEmployee(companyName, salary2, employeeNameHash2, emailAddress2, nric2);
+        insuranceContract.registerEmployee(companyName, salary2, employeeName2, emailAddress2, nric2);
 
         // Initial balance for payment testing
         initBalance = 1000 ether;
@@ -75,7 +75,15 @@ contract UnemploymentInsuranceTest is Test {
         vm.prank(employeeWallet1);
         insuranceContract.payPremium{value: premium1 * months}(months);
 
-        // Employee 1 submits a claim
+        // Employee 1 submits a claim in less than 3 months
+        vm.prank(employeeWallet1);
+        vm.expectRevert("Not enough monthly payments made or not enough time after enrolled!");
+        insuranceContract.submitClaim();
+
+        // set time
+        vm.warp(startTime + 3*30 days +1 days);  
+
+        // Employee 1 submits a claim after 3 months
         vm.prank(employeeWallet1);
         insuranceContract.submitClaim();
 
@@ -107,7 +115,7 @@ contract UnemploymentInsuranceTest is Test {
 
         // Employee 2 should not be able to submit claim due to insufficient payments
         vm.prank(address(employeeWallet2));
-        vm.expectRevert("Not enough monthly payments made!");
+        vm.expectRevert("Not enough monthly payments made or not enough time after enrolled!");
         insuranceContract.submitClaim();
     }
 
