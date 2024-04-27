@@ -1,3 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+.isRequired::before {
+    content: "*";
+    color: rgb(238, 73, 73);
+    margin-right: 4px;
+}

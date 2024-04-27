@@ -1,74 +1,84 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import Main from './view/Main.vue'
-import ChangeTheme from './components/ChangeTheme.vue'
-</script>
+import { ref, onMounted } from 'vue';
 
-<script>
 import Web3 from 'web3';
+import { web3Provider } from './utils/web3Provider'; // Assumed global state for Web3
+import Login from './view/Login.vue';
+import ChangeTheme from './components/ChangeTheme.vue';
 
-export default {
-  name: 'App',
-  data() {
-    return {
-      account: null,
-      web3: null,
-    };
-  },
-  mounted() {
-    this.initWeb3();
-  },
-  methods: {
-    async initWeb3() {
-      if (window.ethereum) {
-        this.web3 = new Web3(window.ethereum);
-        try {
-          await window.ethereum.request({ method: 'eth_requestAccounts' });
-          this.account = (await this.web3.eth.getAccounts())[0];
-        } catch (error) {
-          console.error('User denied account access');
-        }
-      } else if (window.web3) {
-        this.web3 = new Web3(window.web3.currentProvider);
-        this.account = (await this.web3.eth.getAccounts())[0];
-      } else {
-        console.error('Non-Ethereum browser detected. You should install MetaMask!');
-      }
-    },
-    async handleWalletConnection() {
-      if (!this.web3) {
-        await this.initWeb3();
-      }
-      if (this.web3) {
-        try {
-          await window.ethereum.send('eth_requestAccounts');
-          this.account = (await this.web3.eth.getAccounts())[0];
-        } catch (error) {
-          console.error('User denied account access', error);
-        }
-      }
-    },
-  },
+// Reactive references for account and web3 instance
+const account = ref(null);
+
+// Initialization and account setup
+const initWeb3 = async () => {
+  if (window.ethereum) {
+    web3Provider.web3 = new Web3(window.ethereum);
+    try {
+      await window.ethereum.request({ method: 'eth_requestAccounts' });
+      account.value = (await web3Provider.web3.eth.getAccounts())[0];
+    } catch (error) {
+      console.error('User denied account access');
+    }
+  } else if (window.web3) {
+    web3Provider.web3 = new Web3(window.web3.currentProvider);
+    account.value = (await web3Provider.web3.eth.getAccounts())[0];
+  } else {
+    const str = 'Non-Ethereum browser detected. You should install MetaMask!'
+    alert(str)
+    console.error(str);
+  }
 };
+
+const connectWallet = async () => {
+  if (!web3Provider.web3) {
+    await initWeb3();
+  }
+  if (web3Provider.web3) {
+    try {
+      await window.ethereum.send('eth_requestAccounts');
+      account.value = (await web3Provider.web3.eth.getAccounts())[0];
+    } catch (error) {
+      console.error('User denied account access', error);
+    }
+  }
+};
+
+onMounted(() => {
+  initWeb3();
+});
+import {computed} from 'vue'
+const navBarStatus = computed(()=>{
+  if(web3Provider.web3) {
+    return 'logged'
+  }
+  else {
+    return 'not yet'
+  }
+
+})
 </script>
+
+
 
 
 <template>
 <!--  <HelloWorld msg="Vite + Vue" />-->
   <div>
-    <div class="bg-base-300 h-12 flex justify-between items-center px-5">
+    <div :class="[navBarStatus === 'not yet'? 'bg-opacity-0 text-primary-content' : 'bg-base-300 text-base-content']" class=" h-12 flex justify-between items-center px-5">
       <div>
         Account: {{ account }}
       </div>
       <div>
-        <button @click="connectWallet" v-if="!account">Connect Wallet</button>
+        <button @click="connectWallet" v-if="!account" class="btn btn-sm btn-ghost">Connect Wallet</button>
 
         <change-theme></change-theme>
       </div>
 
     </div>
-    <Main></Main>
+<!--    <Main></Main>-->
+    <Login></Login>
   </div>
+
 </template>
 
 
