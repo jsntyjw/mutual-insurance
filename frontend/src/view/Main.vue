@@ -7,8 +7,10 @@
     <ul className="steps mx-10 steps-vertical sm:steps-horizontal">
       <li className="step step-primary">Register</li>
       <li className="step step-primary">HR confirmation</li>
-      <li className="step">Pending</li>
+      <li className="step">Pending Period</li>
       <li className="step">Active</li>
+      <li className="step">Claim Submitted</li>
+      <li className="step">Claim Confirmed</li>
     </ul>
   </div>
   <div class="py-5 px-7 flex flex-col bg-base-200 rounded-lg m-8">
