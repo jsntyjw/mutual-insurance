@@ -144,12 +144,18 @@ async function checkEmployeeRegistered() {
     console.log(1)
 
     // Check if employee is registered
-    const employeeInfo = await contract.methods.getEmployeeInfo(connectedWalletAddress).call()
-    if (employeeInfo["emailAddress"]) {
-      console.log('Employee already registered')
+    const userType = await contract.methods.getAddressIdentity(connectedWalletAddress).call()
+    if (userType === 'employee') {
+      console.log('user type is employee')
+      const employeeInfo = await contract.methods.getEmployeeInfo(connectedWalletAddress).call()
+      if (employeeInfo["emailAddress"]) {
+        console.log('Employee already registered')
+      } else {
+        console.log('Employee not registered')
+      }
       // Do something if employee is already registered, like displaying a message
     } else {
-      console.log('Employee not registered')
+      console.log('connect wallet address is HR')
       // Register the employee using the provided information
       // await registerEmployee()
     }
