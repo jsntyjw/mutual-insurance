@@ -1,18 +1,5 @@
 [
 	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "employeeAddress",
-				"type": "address"
-			}
-		],
-		"name": "checkPaymentOverdue",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
 		"inputs": [],
 		"stateMutability": "nonpayable",
 		"type": "constructor"
@@ -69,42 +56,6 @@
 		"type": "event"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "companyName",
-				"type": "string"
-			},
-			{
-				"internalType": "address",
-				"name": "employeeAddress",
-				"type": "address"
-			}
-		],
-		"name": "confirmClaim",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "companyName",
-				"type": "string"
-			},
-			{
-				"internalType": "address",
-				"name": "employeeAddress",
-				"type": "address"
-			}
-		],
-		"name": "confirmEmploymentStatus",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
 		"anonymous": false,
 		"inputs": [
 			{
@@ -156,32 +107,6 @@
 		"type": "event"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "employeeAddress",
-				"type": "address"
-			}
-		],
-		"name": "exit",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "months",
-				"type": "uint256"
-			}
-		],
-		"name": "payPremium",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
 		"anonymous": false,
 		"inputs": [
 			{
@@ -209,77 +134,6 @@
 	{
 		"inputs": [
 			{
-				"internalType": "string",
-				"name": "companyName",
-				"type": "string"
-			},
-			{
-				"internalType": "address",
-				"name": "hrWallet",
-				"type": "address"
-			}
-		],
-		"name": "registerCompany",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "companyName",
-				"type": "string"
-			},
-			{
-				"internalType": "uint256",
-				"name": "salary",
-				"type": "uint256"
-			},
-			{
-				"internalType": "string",
-				"name": "employeeName",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "emailAddress",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "nric",
-				"type": "string"
-			}
-		],
-		"name": "registerEmployee",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "submitClaim",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "employeeAddress",
-				"type": "address"
-			}
-		],
-		"name": "updateEligibilityForCompensation",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
 				"internalType": "uint256",
 				"name": "salary",
 				"type": "uint256"
@@ -294,6 +148,19 @@
 			}
 		],
 		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "employeeAddress",
+				"type": "address"
+			}
+		],
+		"name": "checkPaymentOverdue",
+		"outputs": [],
+		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
@@ -328,6 +195,42 @@
 	{
 		"inputs": [
 			{
+				"internalType": "string",
+				"name": "companyName",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "employeeAddress",
+				"type": "address"
+			}
+		],
+		"name": "confirmClaim",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "companyName",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "employeeAddress",
+				"type": "address"
+			}
+		],
+		"name": "confirmEmploymentStatus",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
 				"internalType": "address",
 				"name": "",
 				"type": "address"
@@ -342,7 +245,7 @@
 			},
 			{
 				"internalType": "string",
-				"name": "emploeeName",
+				"name": "employeeName",
 				"type": "string"
 			},
 			{
@@ -367,6 +270,11 @@
 			},
 			{
 				"internalType": "uint256",
+				"name": "payout",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
 				"name": "monthsPaid",
 				"type": "uint256"
 			},
@@ -387,6 +295,19 @@
 			}
 		],
 		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "employeeAddress",
+				"type": "address"
+			}
+		],
+		"name": "exit",
+		"outputs": [],
+		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
@@ -440,7 +361,7 @@
 					},
 					{
 						"internalType": "string",
-						"name": "emploeeName",
+						"name": "employeeName",
 						"type": "string"
 					},
 					{
@@ -461,6 +382,11 @@
 					{
 						"internalType": "uint256",
 						"name": "contributionAmount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "payout",
 						"type": "uint256"
 					},
 					{
@@ -557,7 +483,7 @@
 					},
 					{
 						"internalType": "string",
-						"name": "emploeeName",
+						"name": "employeeName",
 						"type": "string"
 					},
 					{
@@ -578,6 +504,11 @@
 					{
 						"internalType": "uint256",
 						"name": "contributionAmount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "payout",
 						"type": "uint256"
 					},
 					{
@@ -631,6 +562,90 @@
 			}
 		],
 		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "months",
+				"type": "uint256"
+			}
+		],
+		"name": "payPremium",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "companyName",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "hrWallet",
+				"type": "address"
+			}
+		],
+		"name": "registerCompany",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "companyName",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "salary",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "employeeName",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "emailAddress",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "nric",
+				"type": "string"
+			}
+		],
+		"name": "registerEmployee",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "submitClaim",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "employeeAddress",
+				"type": "address"
+			}
+		],
+		"name": "updateEligibilityForCompensation",
+		"outputs": [],
+		"stateMutability": "nonpayable",
 		"type": "function"
 	}
 ]

@@ -9,11 +9,12 @@ contract UnemploymentInsurance {
 
     struct Employee {
         address walletAddress;
-        string emploeeName;
+        string employeeName;
         string emailAddress;
         string nric;
         uint256 monthlySalary;
         uint contributionAmount;
+        uint payout;
         uint[] paymentTimestamps;
         uint monthsPaid;
         uint8 status; // 0 - Registered but not confirmed, 1 - Confirmed but not enough payments, 2 - Eligible for claim, 3 - Claim submitted, 4 - Claimed or exited
@@ -71,7 +72,9 @@ contract UnemploymentInsurance {
         bytes32 companyNameHash = generateNameHash(companyName);
         Company storage company = companiesByHash[companyNameHash];
         company.employeeAddresses.push(msg.sender);
-        employees[msg.sender] = Employee(msg.sender, employeeName, emailAddress, nric, salary, determineContribution(salary), new uint[](0), 0, 0, 0, block.timestamp);
+        uint payout = calculatePayout(salary);
+        uint contributionAmount = determineContribution(salary);
+        employees[msg.sender] = Employee(msg.sender, employeeName, emailAddress, nric, salary, contributionAmount, payout, new uint[](0), 0, 0, 0, block.timestamp);
         emit EmployeeRegistered(msg.sender, companyName);
     }
 
@@ -136,12 +139,11 @@ contract UnemploymentInsurance {
         Employee storage employee = employees[employeeAddress];
         require(employee.status != 4, "Already claimed or exited!");
         require(employee.status == 3, "No submitted claim!");
-        uint payout = calculatePayout(employee.monthlySalary);
-        require(address(this).balance >= payout, "Insufficient funds.");
-        payable(employeeAddress).transfer(payout);
+        require(address(this).balance >= employee.payout, "Insufficient funds.");
+        payable(employeeAddress).transfer(employee.payout);
         employee.status = 4;    // Set status to Claimed or exited
         emit EmployeeStatusChanged(employeeAddress, employee.status);
-        emit ClaimConfirmed(employeeAddress, payout);
+        emit ClaimConfirmed(employeeAddress, employee.payout);
     }
 
     // Function to exit the insurance system
