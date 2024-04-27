@@ -78,7 +78,9 @@ const navBarStatus = computed(()=>{
     </div>
 <!--    <Main></Main>-->
 <!--    <Login></Login>-->
-    <HR></HR>
+    <router-view>
+
+    </router-view>
   </div>
 
 </template>
