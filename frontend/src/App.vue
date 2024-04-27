@@ -31,7 +31,8 @@ const initWeb3 = async () => {
     console.error(str);
   }
   contract.data = web3Provider.web3 ? new web3Provider.web3.eth.Contract(contractABI, contractAddress) : null
-  console.log(contract.data.methods)
+
+  if(!contract.data?.methods) return
   await checkEmployeeRegistered()
 };
 
@@ -50,17 +51,6 @@ const connectWallet = async () => {
 };
 
 
-// import {computed} from 'vue'
-//
-// const navBarStatus = computed(()=>{
-//   if(web3Provider.web3) {
-//     return 'logged'
-//   }
-//   else {
-//     return 'not yet'
-//   }
-//
-// })
 
 import {useRouter} from 'vue-router'
 const router = useRouter()
@@ -70,6 +60,7 @@ async function checkEmployeeRegistered() {
     // Get connected wallet address
     const accounts = await web3Provider.web3.eth.requestAccounts()
     const connectedWalletAddress = accounts[0]
+    if(!contract.data?.methods) return
 
     // Check if employee is registered
     const userType = await contract.data.methods.getAddressIdentity(connectedWalletAddress).call()
@@ -92,23 +83,33 @@ async function checkEmployeeRegistered() {
       router.push('/hr')
       console.log('connect wallet address is HR')
       navBarStatus.value = 'hr'
-      // Register the employee using the provided information
-      // await registerEmployee()
     }
   } catch (error) {
     console.error('Error checking employee registration:', error)
   }
 }
 // Execute checkEmployeeRegistered function when the component is mounted
-onMounted(() => {
-  initWeb3();
-  // Check if wallet is connected
-  // console.log(web3Provider.web3, web3Provider.web3.eth.defaultAccount)
-  // if (web3Provider.web3) {
-  //   // Wallet is connected, check if employee is registered
-  //   checkEmployeeRegistered()
-  // }
-})
+if (typeof window.ethereum !== 'undefined') {
+  console.log('MetaMask is installed!');
+
+  // 监听账户变化事件
+  window.ethereum.on('accountsChanged', function (accounts) {
+    initWeb3();
+    // 处理账户变化
+    console.log('Accounts changed:', accounts);
+    if (accounts.length === 0) {
+      console.log('Please connect to MetaMask.');
+    } else {
+      const account = accounts[0];
+      console.log('Current account:', account);
+      // 在这里你可以更新UI或进行其他操作
+    }
+  })
+}
+initWeb3();
+// router.beforeEach((to, from) => {
+//
+// })
 </script>
 
 
@@ -117,8 +118,8 @@ onMounted(() => {
 <template>
 <!--  <HelloWorld msg="Vite + Vue" />-->
   <div>
-    <div :class="[navBarStatus !== 'login'?  'bg-base-300 text-base-content' :  'bg-opacity-0 text-primary-content' ]" class="h-12 flex justify-between items-center px-5">
-      <div  class="whitespace-nowrap">
+    <div :class="[navBarStatus === '' || navBarStatus === 'login' ? 'bg-opacity-0 text-primary-content' : 'bg-base-300 text-base-content' ]" class="h-12 flex justify-between items-center px-1 sm:px-5 z-100">
+      <div  class="whitespace-nowrap overflow-x-auto">
         Account: {{ account }}
       </div>
       <div>
@@ -128,8 +129,6 @@ onMounted(() => {
       </div>
 
     </div>
-<!--    <Main></Main>-->
-<!--    <Login></Login>-->
     <router-view>
 
     </router-view>

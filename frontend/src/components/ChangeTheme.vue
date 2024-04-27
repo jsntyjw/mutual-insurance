@@ -1,11 +1,11 @@
 <template>
-  <div title="Change Theme" class="dropdown dropdown-end">
+  <div title="Change Theme" class="dropdown dropdown-end z-200">
     <div tabindex="0" class="btn gap-1 normal-case btn-ghost btn-sm" @click="setBlur()" @blur="handleBlur()">
       <span class="inline text-md">{{ 'THEME' }}</span>
     </div>
     <div
       :class="[isOpac?'opacity-0-imp':'']"
-      class="dropdown-content bg-base-200 text-base-content rounded-t-box rounded-b-box top-px max-h-96 h-[70vh] w-52 overflow-y-auto shadow-2xl mt-16"
+      class="dropdown-content z-100 bg-base-200 text-base-content rounded-t-box rounded-b-box top-px max-h-96 h-[70vh] w-52 overflow-y-auto shadow-2xl mt-16"
     >
       <div class="grid grid-cols-1 gap-3 p-3" tabindex="0">
         <div

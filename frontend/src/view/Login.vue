@@ -43,10 +43,10 @@
       </div>
 
     </div>
-    <div class="flex flex-1 items-start justify-center pt-5 md:pt-12 mb-6">
-      <div class="md:-translate-x-4 card w-11/12 max-w-sm md:max-w-xs lg:max-w-md glass p-5 pb-7">
+    <div class="flex flex-1 items-start justify-center pt-5 md:pt-12 mb-6 ">
+      <div class="md:-translate-x-4 card w-11/12 max-w-sm md:max-w-xs lg:max-w-md glass p-5 pb-7 ">
         <div class="tabs">
-          <a class="font-bold mb-2 px-1 tab tab-lg tab-lifted tab-border-none">{{ 'Sign Up' }}
+          <a class="font-bold mb-2 px-1 tab tab-lg tab-lifted tab-border-none text-neutral">{{ 'Sign Up' }}
           </a>
         </div>
         <div class="card flex-shrink-0 w-full shadow-2xl bg-base-100 rounded-lg">
@@ -155,12 +155,6 @@ async function handleSubmit() {
   }
 }
 
-// Function to handle form submission
-// function handleSubmit() {
-//   console.log('Form submitted')
-//   // Check if employee is already registered
-//   checkEmployeeRegistered()
-// }
 
 
 </script>
