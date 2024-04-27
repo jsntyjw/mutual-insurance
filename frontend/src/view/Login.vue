@@ -94,7 +94,10 @@
               <label class="label">
                 <span class="isRequired label-text capitalize">{{'Salary'}}</span>
               </label>
-              <input type="number" :placeholder="'Please input your salary (USDT)'" class="input input-bordered">
+              <input type="number" :placeholder="'Please input your salary (USD)'" class="input input-bordered">
+            </div>
+            <div class="form-control mt-6">
+              <button class="btn btn-primary"  > {{ 'Submit' }}</button>
             </div>
           </div>
         </div>
