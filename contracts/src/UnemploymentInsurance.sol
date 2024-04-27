@@ -29,6 +29,7 @@ contract UnemploymentInsurance {
         address[] employeeAddresses;
     }
 
+    uint verifyWaitingTime = 30 seconds;
 
 
     mapping(bytes32 => Company) public companiesByHash;
@@ -70,6 +71,7 @@ contract UnemploymentInsurance {
         require(bytes(companyName).length > 0, "Company name cannot be empty");
         require(salary > 0, "Salary must be greater than zero");
         bytes32 companyNameHash = generateNameHash(companyName);
+        require(companiesByHash[companyNameHash].hrWallet != address(0), "Company does not exist");
         Company storage company = companiesByHash[companyNameHash];
         company.employeeAddresses.push(msg.sender);
         uint payout = calculatePayout(salary);
@@ -109,7 +111,7 @@ contract UnemploymentInsurance {
     function updateEligibilityForCompensation(address employeeAddress) public {
         Employee storage employee = employees[employeeAddress];
         require(employee.status != 4, "Already claimed or exited!");
-        if (employee.monthsPaid >= 3 && block.timestamp > employee.verifiedTimestamp + 3 *30 days){
+        if (employee.monthsPaid >= 3 && block.timestamp > employee.verifiedTimestamp + verifyWaitingTime){
             employee.status = 2;
             emit EmployeeStatusChanged(msg.sender, employee.status);
         }
@@ -154,6 +156,11 @@ contract UnemploymentInsurance {
         emit EmployeeExited(employeeAddress);
     }
 
+    // Funtion to update verify waiting time
+    function updateVerifyWaitingTime(uint num) public onlyOwner {
+        verifyWaitingTime = num * 1 seconds;
+    }
+
 
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> View functions <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -195,7 +202,12 @@ contract UnemploymentInsurance {
             employeeByCompanyName[i] =  employees[company.employeeAddresses[i]];
         }
         return employeeByCompanyName;
-     }
+    }
+
+    // View funtion to get verify waiting time
+    function getVerifyWaitingTime() public view returns (uint) {
+        return verifyWaitingTime;
+    }
 
 
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Helper functions <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
