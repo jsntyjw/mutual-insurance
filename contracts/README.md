@@ -1,6 +1,8 @@
 ## 安装依赖库如openzeppelin：
 ```shell
 $ forge update
+forge install OpenZeppelin/openzeppelin-contracts --no-commit
+forge install foundry-rs/forge-std --no-commit
 ```
 
 ## 编译
