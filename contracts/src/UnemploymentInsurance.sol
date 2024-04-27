@@ -26,8 +26,11 @@ contract UnemploymentInsurance {
         address[] employeeAddresses;
     }
 
+
+
     mapping(bytes32 => Company) public companiesByHash;
     mapping(address => Employee) public employees;
+    mapping(address => bytes32) public hrWallets;     // hrWallet => companyNameHash
 
     event CompanyRegistered(bytes32 companyNameHash, string companyName);
     event EmployeeRegistered(address indexed employeeAddress, string companyName);
@@ -55,6 +58,7 @@ contract UnemploymentInsurance {
         require(bytes(companyName).length > 0, "Company name cannot be empty");
         require(hrWallet != address(0), "HR wallet address cannot be zero");
         companiesByHash[companyNameHash] = Company(hrWallet, companyNameHash, companyName, new address[](0));
+        hrWallets[hrWallet] = companyNameHash;
         emit CompanyRegistered(companyNameHash, companyName);
     }
 
@@ -164,6 +168,17 @@ contract UnemploymentInsurance {
     function getAddressByCompanyName(string memory companyName) public view returns (address[] memory) {
         bytes32 companyNameHash = generateNameHash(companyName);
         return companiesByHash[companyNameHash].employeeAddresses;
+    }
+
+    // View funtion to get the address's identity (employee or hr)
+    function  getAddressIdentity(address userAddress) public view returns (string memory) {
+        if (hrWallets[userAddress] == 0x0000000000000000000000000000000000000000000000000000000000000000) {
+            return "employee";
+        } else {
+            bytes32 companyNameHash = hrWallets[userAddress];
+            string memory companyName = companiesByHash[companyNameHash].companyName;
+            return companyName;
+        }
     }
 
 
