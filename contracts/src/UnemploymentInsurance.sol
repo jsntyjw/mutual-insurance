@@ -8,6 +8,7 @@ contract UnemploymentInsurance {
     address private _owner;
 
     struct Employee {
+        address walletAddress;
         string emploeeName;
         string emailAddress;
         string nric;
@@ -17,6 +18,7 @@ contract UnemploymentInsurance {
         uint monthsPaid;
         uint8 status; // 0 - Registered but not confirmed, 1 - Confirmed but not enough payments, 2 - Eligible for claim, 3 - Claim submitted, 4 - Claimed or exited
         uint verifiedTimestamp;
+        uint registerTimestamp;
     }
 
     struct Company {
@@ -69,7 +71,7 @@ contract UnemploymentInsurance {
         bytes32 companyNameHash = generateNameHash(companyName);
         Company storage company = companiesByHash[companyNameHash];
         company.employeeAddresses.push(msg.sender);
-        employees[msg.sender] = Employee(employeeName, emailAddress, nric, salary, determineContribution(salary), new uint[](0), 0, 0, 0);
+        employees[msg.sender] = Employee(msg.sender, employeeName, emailAddress, nric, salary, determineContribution(salary), new uint[](0), 0, 0, 0, block.timestamp);
         emit EmployeeRegistered(msg.sender, companyName);
     }
 
@@ -182,8 +184,9 @@ contract UnemploymentInsurance {
     }
 
     // View funtion to get all employee information by company name
-    function getAllEmployeeByCompanyName(string memory companyName) public view returns (Employee[] memory) {
-        bytes32 companyNameHash = generateNameHash(companyName);
+    function getAllEmployeeByCompanyName() public view returns (Employee[] memory) {
+        bytes32 companyNameHash = hrWallets[msg.sender];
+        require(companyNameHash != 0x0000000000000000000000000000000000000000000000000000000000000000, "Only HR can view employee information of the company.");
         Company storage company = companiesByHash[companyNameHash];
         Employee[] memory employeeByCompanyName = new Employee[](company.employeeAddresses.length);
         for (uint i = 0; i < company.employeeAddresses.length; i++) {
