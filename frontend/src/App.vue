@@ -2,12 +2,12 @@
 import { ref, onMounted } from 'vue';
 
 import Web3 from 'web3';
-import { web3Provider,contract } from './utils/web3Provider'; // Assumed global state for Web3
+import { web3Provider, contract } from './utils/web3Provider'; // Assumed global state for Web3
 import Login from './view/Login.vue';
 import HR from './view/HR.vue';
 import ChangeTheme from './components/ChangeTheme.vue';
 import contractABI from "./contract/contractABI.json";
-import {contractAddress} from "./contract/contractConstants.js";
+import { contractAddress } from "./contract/contractConstants.js";
 
 // Reactive references for account and web3 instance
 const account = ref(null);
@@ -32,7 +32,7 @@ const initWeb3 = async () => {
   }
   contract.data = web3Provider.web3 ? new web3Provider.web3.eth.Contract(contractABI, contractAddress) : null
 
-  if(!contract.data?.methods) return
+  if (!contract.data?.methods) return
   await checkEmployeeRegistered()
 };
 
@@ -52,7 +52,7 @@ const connectWallet = async () => {
 
 
 
-import {useRouter} from 'vue-router'
+import { useRouter } from 'vue-router'
 const router = useRouter()
 const navBarStatus = ref('')
 async function checkEmployeeRegistered() {
@@ -60,10 +60,10 @@ async function checkEmployeeRegistered() {
     // Get connected wallet address
     const accounts = await web3Provider.web3.eth.requestAccounts()
     const connectedWalletAddress = accounts[0]
-    if(!contract.data?.methods) return
+    if (!contract.data?.methods) return
 
     // Check if employee is registered
-    const userType = await contract.data.methods.getAddressIdentity(connectedWalletAddress).call()
+    const userType = await contract.data.methods.getAddressIdentity().call({ from: connectedWalletAddress })
     if (userType === 'employee') {
       console.log('user type is employee')
       const employeeInfo = await contract.data.methods.getEmployeeInfo(connectedWalletAddress).call()
@@ -116,10 +116,12 @@ initWeb3();
 
 
 <template>
-<!--  <HelloWorld msg="Vite + Vue" />-->
+  <!--  <HelloWorld msg="Vite + Vue" />-->
   <div>
-    <div :class="[navBarStatus === '' || navBarStatus === 'login' ? 'bg-opacity-0 text-primary-content' : 'bg-base-300 text-base-content' ]" class="h-12 flex justify-between items-center px-1 sm:px-5 z-100">
-      <div  class="whitespace-nowrap overflow-x-auto">
+    <div
+      :class="[navBarStatus === '' || navBarStatus === 'login' ? 'bg-opacity-0 text-primary-content' : 'bg-base-300 text-base-content']"
+      class="h-12 flex justify-between items-center px-1 sm:px-5 z-100">
+      <div class="whitespace-nowrap overflow-x-auto">
         Account: {{ account }}
       </div>
       <div>
@@ -144,12 +146,12 @@ initWeb3();
   will-change: filter;
   transition: filter 300ms;
 }
+
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
+
 .logo.vue:hover {
   filter: drop-shadow(0 0 2em #42b883aa);
 }
 </style>
-
-
