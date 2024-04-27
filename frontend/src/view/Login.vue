@@ -1,19 +1,10 @@
 <template>
   <div
-      class="fixed left-0 -z-10 h-full w-full top-0 from-primary flex to-secondary text-primary-content items-end bg-gradient-to-br"
-
-  >
-    <svg
-        class="fill-secondary col-start-1 row-start-1 h-auto w-full"
-        width="1600"
-        height="495"
-        viewBox="0 0 1600 495"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-    >
+    class="fixed left-0 -z-10 h-full w-full top-0 from-primary flex to-secondary text-primary-content items-end bg-gradient-to-br">
+    <svg class="fill-secondary col-start-1 row-start-1 h-auto w-full" width="1600" height="495" viewBox="0 0 1600 495"
+      fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
-          d="M0 338L53.3 349.2C106.7 360.3 213.3 382.7 320 393.8C426.7 405 533.3 405 640 359.3C746.7 313.7 853.3 222.3 960 189.2C1066.7 156 1173.3 181 1280 159.2C1386.7 137.3 1493.3 68.7 1546.7 34.3L1600 0V595H1546.7C1493.3 595 1386.7 595 1280 595C1173.3 595 1066.7 595 960 595C853.3 595 746.7 595 640 595C533.3 595 426.7 595 320 595C213.3 595 106.7 595 53.3 595H0V338Z"
-      />
+        d="M0 338L53.3 349.2C106.7 360.3 213.3 382.7 320 393.8C426.7 405 533.3 405 640 359.3C746.7 313.7 853.3 222.3 960 189.2C1066.7 156 1173.3 181 1280 159.2C1386.7 137.3 1493.3 68.7 1546.7 34.3L1600 0V595H1546.7C1493.3 595 1386.7 595 1280 595C1173.3 595 1066.7 595 960 595C853.3 595 746.7 595 640 595C533.3 595 426.7 595 320 595C213.3 595 106.7 595 53.3 595H0V338Z" />
     </svg>
   </div>
   <div class="flex w-full h-full">
@@ -55,49 +46,48 @@
     <div class="flex flex-1 items-start justify-center pt-5 md:pt-12 mb-6">
       <div class="md:-translate-x-4 card w-11/12 max-w-sm md:max-w-xs lg:max-w-md glass p-5 pb-7">
         <div class="tabs">
-          <a
-              class="font-bold mb-2 px-1 tab tab-lg tab-lifted tab-border-none"
-          >{{ 'Sign Up' }}
+          <a class="font-bold mb-2 px-1 tab tab-lg tab-lifted tab-border-none">{{ 'Sign Up' }}
           </a>
         </div>
-        <div
-            class="card flex-shrink-0 w-full shadow-2xl bg-base-100 rounded-lg"
-        >
+        <div class="card flex-shrink-0 w-full shadow-2xl bg-base-100 rounded-lg">
           <div class="w-full card-body p-5 pt-2 pb-7">
             <div class="form-control">
               <label class="label">
-                <span class="isRequired label-text capitalize">{{'NRIC'}}</span>
+                <span class="isRequired label-text capitalize">{{ 'NRIC' }}</span>
               </label>
-              <input :placeholder="'Please input your NRIC'" class="input input-bordered">
+              <input v-model="inputForm.data.NRIC" :placeholder="'Please input your NRIC'" class="input input-bordered">
             </div>
             <div class="form-control">
               <label class="label">
-                <span class="isRequired label-text capitalize">{{'Name'}}</span>
+                <span class="isRequired label-text capitalize">{{ 'Name' }}</span>
               </label>
-              <input  :placeholder="'Please input your name'" class="input input-bordered">
+              <input v-model="inputForm.data.name" :placeholder="'Please input your name'" class="input input-bordered">
             </div>
             <div class="form-control">
               <label class="label">
-                <span class="isRequired label-text capitalize">{{'Email'}}</span>
+                <span class="isRequired label-text capitalize">{{ 'Email' }}</span>
               </label>
-              <input type="email" :placeholder="'Please input your email'" class="input input-bordered">
-            </div>
-
-            <div class="form-control">
-              <label class="label">
-                <span class="isRequired label-text capitalize">{{'Company'}}</span>
-              </label>
-              <input type="email" :placeholder="'Please input your company'" class="input input-bordered">
+              <input v-model="inputForm.data.email" type="email" :placeholder="'Please input your email'"
+                class="input input-bordered">
             </div>
 
             <div class="form-control">
               <label class="label">
-                <span class="isRequired label-text capitalize">{{'Salary'}}</span>
+                <span class="isRequired label-text capitalize">{{ 'Company' }}</span>
               </label>
-              <input type="number" :placeholder="'Please input your salary (USD)'" class="input input-bordered">
+              <input v-model="inputForm.data.company" :placeholder="'Please input your company'"
+                class="input input-bordered">
+            </div>
+
+            <div class="form-control">
+              <label class="label">
+                <span class="isRequired label-text capitalize">{{ 'Salary' }}</span>
+              </label>
+              <input v-model="inputForm.data.salary" type="number" :placeholder="'Please input your salary (USD)'"
+                class="input input-bordered">
             </div>
             <div class="form-control mt-6">
-              <button class="btn btn-primary"  > {{ 'Submit' }}</button>
+              <button @click="handleSubmit" class="btn btn-primary"> {{ 'Submit' }}</button>
             </div>
           </div>
         </div>
@@ -106,3 +96,104 @@
     </div>
   </div>
 </template>
+<!-- <script setup>
+import { reactive } from 'vue'
+const inputForm = reactive({
+  data: {
+    'NRIC': '',
+    'name': '',
+    'email': '',
+    'company': '',
+    'salary': 0
+  }
+})
+function handleSubmit() {
+  console.log(inputForm.data)
+}
+
+</script> -->
+
+<script setup>
+import { reactive, onMounted } from 'vue'
+import { web3Provider } from '../utils/web3Provider.js' // Import your web3Provider
+import { contractAddress } from '../contract/contractConstants.js'
+import contractABI from '../contract/contractABI.json'
+
+
+const inputForm = reactive({
+  data: {
+    'NRIC': '',
+    'name': '',
+    'email': '',
+    'company': '',
+    'salary': 0
+  }
+})
+
+
+
+// Initialize contract instance
+const contract = new web3Provider.web3.eth.Contract(contractABI, contractAddress)
+
+// Function to check if employee is already registered
+async function checkEmployeeRegistered() {
+  try {
+    // Get connected wallet address
+    const accounts = await web3Provider.web3.eth.requestAccounts()
+    const connectedWalletAddress = accounts[0]
+    console.log(1)
+
+    // Check if employee is registered
+    const employeeInfo = await contract.methods.getEmployeeInfo(connectedWalletAddress).call()
+    if (employeeInfo["emailAddress"]) {
+      console.log('Employee already registered')
+      // Do something if employee is already registered, like displaying a message
+    } else {
+      console.log('Employee not registered')
+      // Register the employee using the provided information
+      // await registerEmployee()
+    }
+  } catch (error) {
+    console.error('Error checking employee registration:', error)
+  }
+}
+
+// Function to register employee
+async function handleSubmit() {
+  try {
+    console.log("form submitting")
+    // Extract input form data
+    const { NRIC, name, email, company, salary } = inputForm.data
+
+    // Call registerEmployee function in the smart contract
+    const accounts = await web3Provider.web3.eth.requestAccounts()
+    const connectedWalletAddress = accounts[0]
+
+    await contract.methods.registerEmployee(company, salary, name, email, NRIC).send({ from: connectedWalletAddress })
+
+    console.log('Employee registered successfully')
+    // Do something after successful registration, like displaying a success message
+  } catch (error) {
+    console.error('Error registering employee:', error)
+    // Handle error, like displaying an error message
+  }
+}
+
+// Function to handle form submission
+// function handleSubmit() {
+//   console.log('Form submitted')
+//   // Check if employee is already registered
+//   checkEmployeeRegistered()
+// }
+
+// Execute checkEmployeeRegistered function when the component is mounted
+onMounted(() => {
+  // Check if wallet is connected
+  // console.log(web3Provider.web3, web3Provider.web3.eth.defaultAccount)
+  if (web3Provider.web3) {
+    // Wallet is connected, check if employee is registered 
+    checkEmployeeRegistered()
+  }
+})
+
+</script>
