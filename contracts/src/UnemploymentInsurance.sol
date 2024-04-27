@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+// import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract UnemploymentInsurance is Ownable {
+// contract UnemploymentInsurance is Ownable {
+contract UnemploymentInsurance {
+    address private _owner;
+
     struct Employee {
         string emploeeName;
         string emailAddress;
@@ -36,8 +39,14 @@ contract UnemploymentInsurance is Ownable {
 
 
 
-    constructor() Ownable(msg.sender) { }
-
+    // constructor() Ownable(msg.sender) { }
+    constructor() {
+        _owner = msg.sender;
+    }
+    modifier onlyOwner(){
+        require(_owner == msg.sender, "Only the owner of the contract can add company");
+        _;
+    }
 
     // Function to register a company
     function registerCompany(string memory companyName, address hrWallet) public onlyOwner {
