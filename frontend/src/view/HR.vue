@@ -78,7 +78,7 @@ const pendingConfirmationEmployees = computed(() => {
 });
 
 const claimSubmittedEmployees = computed(() => {
-  const filteredEmployees = maskedEmployeeData.value.filter(employee => getEmployeeStatus(employee.status) === 'Claim submitted');
+  const filteredEmployees = maskedEmployeeData.value.filter(employee => getEmployeeStatus(employee.status) === 'Claim Submitted');
   console.log('Claim Submitted Employees:', filteredEmployees);
   return filteredEmployees;
 });
