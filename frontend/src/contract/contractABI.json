@@ -151,13 +151,7 @@
 		"type": "event"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "employeeAddress",
-				"type": "address"
-			}
-		],
+		"inputs": [],
 		"name": "exit",
 		"outputs": [],
 		"stateMutability": "nonpayable",
