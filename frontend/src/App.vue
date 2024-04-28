@@ -55,6 +55,10 @@ const connectWallet = async () => {
 import { useRouter } from 'vue-router'
 const router = useRouter()
 const navBarStatus = ref('')
+
+function handleStatusChange(val) {
+  navBarStatus.value = val
+}
 async function checkEmployeeRegistered() {
   try {
     // Get connected wallet address
@@ -131,7 +135,7 @@ initWeb3();
       </div>
 
     </div>
-    <router-view>
+    <router-view @status-change="handleStatusChange">
 
     </router-view>
   </div>

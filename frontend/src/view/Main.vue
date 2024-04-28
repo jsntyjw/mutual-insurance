@@ -25,7 +25,7 @@
         </div>
         <div class="flex flex-col items-center">
           <div class="mb-3 text-xl">{{employeeInfo.data.contributionAmount + ' USD'}}</div>
-          <div class="btn btn-sm my-2">Confirm</div>
+          <div @click="handleMonthlyPayment" class="btn btn-sm my-2">Confirm</div>
         </div>
       </div>
 
@@ -37,8 +37,8 @@
           <div class=" text-lg">Claim</div>
         </div>
         <div class="flex flex-col items-center">
-          <div class="mb-3 text-xl">6780342 USD</div>
-          <div class="btn btn-sm my-2">Submit Claim</div>
+          <div class="mb-3 text-xl">{{ employeeInfo.data.payout + ' USD' }}</div>
+          <div :class="{'btn-disabled': employeeInfo.data.status < 4}" class="btn btn-sm my-2">Submit Claim</div>
         </div>
       </div>
 
@@ -72,12 +72,13 @@ const employeeInfo = reactive({data:{
   monthsPaid: 0,
   contributionAmount: 0,
   status: 0,
+  payout: 0
   }})
 const employeeInfoDisplay = computed(()=>{
   const tmp = {}
   for(let key in employeeInfo.data) {
     const value = employeeInfo.data[key]
-    if(key === 'status' || key === 'contributionAmount') continue
+    if(key === 'status' || key === 'contributionAmount' ||key === 'payout') continue
     if(key === 'monthsPaid') key = 'Cumulative total'
     tmp[key] = value
   }
@@ -93,6 +94,7 @@ async function initEmployeeInfo() {
   // Check if employee is registered
   const data = await contract.data.methods.getEmployeeInfo(connectedWalletAddress).call()
   console.log(data)
+  employeeInfo.data.payout = Number(data.payout)
   employeeInfo.data.name = data.employeeName
   employeeInfo.data.NRIC = data.nric
   employeeInfo.data.email = data.emailAddress
@@ -103,9 +105,34 @@ async function initEmployeeInfo() {
 
 }
 initEmployeeInfo()
+if (typeof window.ethereum !== 'undefined') {
+  console.log('MetaMask is installed!');
+
+  // 监听账户变化事件
+  window.ethereum.on('accountsChanged', function (accounts) {
+    initEmployeeInfo()
+  })
+}
 onMounted(async ()=>{
   // await initEmployeeInfo()
 })
+async function handleMonthlyPayment() {
+  const accounts = await web3Provider.web3.eth.requestAccounts()
+  const connectedWalletAddress = accounts[0]
+  if(!contract.data?.methods) {
+    contract.data = web3Provider.web3 ? new web3Provider.web3.eth.Contract(contractABI, contractAddress) : null
+  }
+
+  // Check if employee is registered
+  const data = await contract.data.methods.payPremium(1).send({
+    from: connectedWalletAddress,
+    value: value,
+    gas: 2000000  // 设置足够高的gas限制确保交易不会因为gas不足失败
+  })
+  console.log(data)
+  initEmployeeInfo()
+
+}
 </script>
 
 <style scoped>

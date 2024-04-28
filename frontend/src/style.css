@@ -6,3 +6,58 @@
     color: rgb(238, 73, 73);
     margin-right: 4px;
 }
+@keyframes mymove
+{
+    0% {
+        transform:translateX(-24rem);
+    }
+    /*60% {transform:translateX(6rem);}*/
+    100% {transform:translateX(27rem);}
+}
+.el-message--info {
+    background-color: hsl(var(--in)) !important;
+    color: hsl(var(--inc)) !important;
+    border-color: hsl(var(--in)) !important;
+    border-radius: var(--rounded-btn, 0.5rem) !important;
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+    @apply opacity-90;
+}
+.el-message--info .el-message-icon--info{
+    color: hsl(var(--inc)) !important;
+}
+.el-message--info .el-message__content {
+    color: hsl(var(--inc)) !important;
+}
+
+.el-message--success {
+    background-color: hsl(var(--su)) !important;
+    color: hsl(var(--suc)) !important;
+    border-color: hsl(var(--su)) !important;
+    border-radius: var(--rounded-btn, 0.5rem) !important;
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+    @apply opacity-90;
+}
+.el-message--success .el-message-icon--success{
+    color: hsl(var(--suc)) !important;
+}
+.el-message--success .el-message__content {
+    color: hsl(var(--suc)) !important;
+}
+
+.el-message--error {
+    background-color: hsl(var(--er)) !important;
+    color: hsl(var(--erc)) !important;
+    border-color: hsl(var(--er)) !important;
+    border-radius: var(--rounded-btn, 0.5rem) !important;
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+    @apply opacity-90;
+}
+.el-message--error .el-message-icon--error{
+    color: hsl(var(--erc)) !important;
+}
+.el-message--error .el-message__content {
+    color: hsl(var(--erc)) !important;
+}

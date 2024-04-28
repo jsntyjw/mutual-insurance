@@ -137,6 +137,8 @@ const inputForm = reactive({
 // Function to register employee
 import {useRouter} from 'vue-router'
 const router = useRouter()
+import { ElMessage } from 'element-plus'
+const emit = defineEmits(['status-change'])
 async function handleSubmit() {
   try {
     console.log("form submitting")
@@ -146,13 +148,22 @@ async function handleSubmit() {
     // Call registerEmployee function in the smart contract
     const accounts = await web3Provider.web3.eth.requestAccounts()
     const connectedWalletAddress = accounts[0]
+    // console.log(NRIC, name, email, company, salary)
+    const loadingMsg = ElMessage({
+      message: "<div class='flex items-center'><div style='background: rgba(255,255,255,0.2)' class='w-48 md:w-96 h-1.5 overflow-hidden rounded-md'><div style='animation-timing-function:ease-in-out;animation: mymove 3s infinite' class='rounded-md opacity-75 w-48 md:w-96 h-1.5 bg-white'></div></div><div class='ml-3 flex-none'>" + 'Pending' + '</div></div>',
+      type: 'info',
+      duration: 0,
+      dangerouslyUseHTMLString: true
+    })
 
     await contract.data.methods.registerEmployee(company, salary, name, email, NRIC).send({ from: connectedWalletAddress })
-
+    loadingMsg.close()
+    emit('status-change','main')
     console.log('Employee registered successfully')
     router.push('/main')
     // Do something after successful registration, like displaying a success message
   } catch (error) {
+    loadingMsg.close()
     console.error('Error registering employee:', error)
     // Handle error, like displaying an error message
   }
