@@ -163,11 +163,11 @@ contract UnemploymentInsurance {
     }
 
     // Function to exit the insurance system
-    function exit(address employeeAddress) public {
-        Employee storage employee = employees[employeeAddress];
+    function exit() public {
+        Employee storage employee = employees[msg.sender];
         employee.status = 4;    // Set status to Claimed or exited
-        emit EmployeeStatusChanged(employeeAddress, employee.status);
-        emit EmployeeExited(employeeAddress);
+        emit EmployeeStatusChanged(msg.sender, employee.status);
+        emit EmployeeExited(msg.sender);
     }
 
     // Funtion to update verify waiting time
@@ -270,4 +270,5 @@ contract UnemploymentInsurance {
             return salary * 20 ether / 100;
         }
     }
+
 }
