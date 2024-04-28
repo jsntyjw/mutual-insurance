@@ -13,7 +13,7 @@
         </svg>
       </div>
     </div>
-    <el-table :data="maskedEmployeeData" style="width: 100%">
+    <el-table :data="pendingConfirmationEmployees" style="width: 100%">
       <el-table-column prop="maskedWalletAddress" label="walletAddress" width="180" />
       <el-table-column prop="emailAddress" label="email" width="180" />
       <el-table-column prop="nric" label="nric" />
@@ -25,13 +25,34 @@
       </el-table-column>
       <el-table-column label="Action">
         <template #default="scope">
-          <el-button v-if="getEmployeeStatus(scope.row.status) === 'Pending Confirmation'"
-            @click="confirmEmploymentStatus(scope.row.walletAddress)">Verify</el-button>
+          <el-button @click="confirmEmploymentStatus(scope.row.walletAddress)">Verify</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+
+    <div class="flex mb-4 mt-8">
+      <div class="bg-secondary w-2.5 rounded-lg scale-50 -translate-x-1"></div>
+      <div class="font-bold text-xl">Unemployment Verification</div>
+    </div>
+    <el-table :data="claimSubmittedEmployees" style="width: 100%">
+      <el-table-column prop="maskedWalletAddress" label="walletAddress" width="180" />
+      <el-table-column prop="emailAddress" label="email" width="180" />
+      <el-table-column prop="nric" label="nric" />
+      <el-table-column prop="monthlySalary" label="monthlySalary" />
+      <el-table-column prop="status" label="status">
+        <template #default="scope">
+          <span>{{ getEmployeeStatus(scope.row.status) }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="Action">
+        <template #default="scope">
+          <el-button @click="confirmClaim(scope.row.walletAddress)">Verify</el-button>
         </template>
       </el-table-column>
     </el-table>
   </div>
 </template>
+
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { ElTable, ElTableColumn, ElButton } from 'element-plus';
@@ -49,6 +70,19 @@ const maskedEmployeeData = computed(() => {
   }));
 });
 
+const pendingConfirmationEmployees = computed(() => {
+  console.log("filteredEmployees" + maskedEmployeeData.value)
+  const filteredEmployees = maskedEmployeeData.value.filter(employee => getEmployeeStatus(employee.status) === 'Pending HR Comfirmation');
+  console.log('Pending Confirmation Employees:', filteredEmployees);
+  return filteredEmployees;
+});
+
+const claimSubmittedEmployees = computed(() => {
+  const filteredEmployees = maskedEmployeeData.value.filter(employee => getEmployeeStatus(employee.status) === 'Claim submitted');
+  console.log('Claim Submitted Employees:', filteredEmployees);
+  return filteredEmployees;
+});
+
 function maskWalletAddress(address) {
   if (address && address.length >= 10) {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
@@ -63,7 +97,7 @@ async function getEmployeeInformation() {
     console.log("connected wallet address:" + connectedWalletAddress);
     const employeeInformation = await contract.methods.getAllEmployeeByCompanyName().call({ from: connectedWalletAddress });
     if (employeeInformation) {
-      console.log("employeeInformation:" + employeeInformation);
+      console.log("employeeInformation:", employeeInformation);
       employeeData.value = employeeInformation;
     } else {
       console.log('No employee information fetched');
@@ -86,18 +120,36 @@ async function confirmEmploymentStatus(employeeAddress) {
   }
 }
 
+async function confirmClaim(employeeAddress) {
+  try {
+    const accounts = await web3Provider.web3.eth.requestAccounts();
+    const connectedWalletAddress = accounts[0];
+    console.log("Confirming claim for employee address:", employeeAddress);
+    await contract.methods.confirmClaim(employeeAddress).send({ from: connectedWalletAddress });
+    console.log("Claim confirmed for employee address:", employeeAddress);
+    getEmployeeInformation(); // Refresh employee data after confirmation
+  } catch (error) {
+    console.error('Error confirmClaim:', error);
+  }
+}
+
 function getEmployeeStatus(status) {
+  console.log('status is: ' + status)
   switch (parseInt(status)) {
     case 0:
-      return 'Pending Confirmation';
+      return 'Unregistered';
     case 1:
-      return 'Confirmed but not enough payments';
+      return 'Pending HR Comfirmation';
     case 2:
-      return 'Eligible for claim';
+      return 'Waiting Period';
     case 3:
-      return 'Claim submitted';
+      return 'Active';
     case 4:
-      return 'Claimed or exited';
+      return 'Claim Submitted';
+    case 5:
+      return 'Claim Comfirmed';
+    case 6:
+      return 'Terminated';
     default:
       return 'Others';
   }
