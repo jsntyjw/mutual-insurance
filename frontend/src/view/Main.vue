@@ -45,7 +45,7 @@
     </div>
   </div>
   <div class="px-7 mt-8">
-    <div class="btn btn-sm btn-accent">
+    <div @click="exit" class="btn btn-sm btn-accent">
       EXIT THE INSURANCE
     </div>
   </div>
@@ -131,6 +131,19 @@ async function handleMonthlyPayment() {
   })
   console.log(data)
   initEmployeeInfo()
+
+}
+
+async function exit() {
+  const accounts = await web3Provider.web3.eth.requestAccounts()
+  const connectedWalletAddress = accounts[0]
+  if(!contract.data?.methods) {
+    contract.data = web3Provider.web3 ? new web3Provider.web3.eth.Contract(contractABI, contractAddress) : null
+  }
+
+  // Check if employee is registered
+  const data = await contract.data.methods.exit(connectedWalletAddress).call()
+  console.log(data)
 
 }
 </script>
