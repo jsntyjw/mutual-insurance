@@ -135,6 +135,8 @@ const inputForm = reactive({
 // Function to check if employee is already registered
 
 // Function to register employee
+import {useRouter} from 'vue-router'
+const router = useRouter()
 async function handleSubmit() {
   try {
     console.log("form submitting")
@@ -148,6 +150,7 @@ async function handleSubmit() {
     await contract.data.methods.registerEmployee(company, salary, name, email, NRIC).send({ from: connectedWalletAddress })
 
     console.log('Employee registered successfully')
+    router.push('/main')
     // Do something after successful registration, like displaying a success message
   } catch (error) {
     console.error('Error registering employee:', error)
