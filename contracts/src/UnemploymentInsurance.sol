@@ -1,11 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-// import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "./ERC20_SGDT.sol";
 
 // contract UnemploymentInsurance is Ownable {
 contract UnemploymentInsurance {
     address private _owner;
+
+    // ERC20 token
+    address SGDTAddress = 0xa5Eeb3661ED2FA716E7DB8A9B8ec5d07274d4a71;
+    SGDT SGDToken = SGDT(SGDTAddress);
 
     struct Employee {
         address walletAddress;
@@ -92,13 +97,19 @@ contract UnemploymentInsurance {
 
     // Function to pay premium
     function payPremium(uint months) public payable {
-        checkPaymentOverdue(msg.sender);
         Employee storage employee = employees[msg.sender];
+        if (employee.paymentTimestamps.length != 0) {
+            checkPaymentOverdue(msg.sender);
+        }
         require(employee.status != 4, "Already claimed or exited!");
         require(employee.status != 0, "Registration not confirmed yet!");
         require(employee.status != 3, "Claim request already made, pending approval!");
         require(employee.status == 1 || employee.status == 2, "Not in a valid state to pay premiums.");
-        require(msg.value == employee.contributionAmount * months, "Incorrect premium amount.");
+        // require(msg.value == employee.contributionAmount * months, "Incorrect premium amount.");
+        uint payAmount = employee.contributionAmount * months;
+        require(SGDToken.allowance(msg.sender, address(this)) >= payAmount, "SGDT allowance is not enough.");
+        require(SGDToken.balanceOf(msg.sender) >= payAmount, "Balance not enough");
+        require(SGDToken.transferFrom(msg.sender, address(this), payAmount), "Deposit failed");
         for (uint i = 0; i < months; i++) {
             employee.paymentTimestamps.push(block.timestamp);
         }
@@ -141,8 +152,10 @@ contract UnemploymentInsurance {
         Employee storage employee = employees[employeeAddress];
         require(employee.status != 4, "Already claimed or exited!");
         require(employee.status == 3, "No submitted claim!");
-        require(address(this).balance >= employee.payout, "Insufficient funds.");
-        payable(employeeAddress).transfer(employee.payout);
+        // require(address(this).balance >= employee.payout, "Insufficient funds.");
+        // payable(employeeAddress).transfer(employee.payout);
+        require(SGDToken.balanceOf(address(this)) > employee.payout, "Insufficient funds in pool.");
+        require(SGDToken.transfer(employeeAddress, employee.payout), "Unable to transfer.");
         employee.status = 4;    // Set status to Claimed or exited
         emit EmployeeStatusChanged(employeeAddress, employee.status);
         emit ClaimConfirmed(employeeAddress, employee.payout);
@@ -182,7 +195,7 @@ contract UnemploymentInsurance {
     }
 
     // View funtion to get the address's identity (employee or hr)
-    function  getAddressIdentity() public view returns (string memory) {
+    function getAddressIdentity() public view returns (string memory) {
         if (hrWallets[msg.sender] == 0x0000000000000000000000000000000000000000000000000000000000000000) {
             return "employee";
         } else {
@@ -209,13 +222,18 @@ contract UnemploymentInsurance {
         return verifyWaitingTime;
     }
 
+    // View funtion to get SGDT Pool balance of contract
+    function getPoolBalance() public view returns (uint) {
+        return SGDToken.balanceOf(address(this));
+    }
+
 
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Helper functions <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     // Helper function to check if the employ has exceeded the 3 month limit after last payment before each action
     function checkPaymentOverdue(address employeeAddress) public {
         Employee storage employee = employees[employeeAddress];
-        if (block.timestamp > employee.verifiedTimestamp + employee.monthsPaid * 30 days + 3 *30 days) {
+        if (block.timestamp > employee.paymentTimestamps[0] + employee.monthsPaid * 30 days + 3 *30 days) {
             employee.status = 4;    // Set status to claimed or exited due to non-payment
             emit EmployeeStatusChanged(employeeAddress, employee.status);
         }
@@ -242,13 +260,13 @@ contract UnemploymentInsurance {
     // Helper function to calculate payout
     function calculatePayout(uint salary) public pure returns (uint) {
         if (salary <= 2000) {
-            return salary * 50 / 100;
+            return salary * 50 ether / 100;
         } else if (salary <= 5000) {
-            return salary * 40 / 100;
+            return salary * 40 ether / 100;
         } else if (salary <= 10000) {
-            return salary * 30 / 100;
+            return salary * 30 ether / 100;
         } else {
-            return salary * 20 / 100;
+            return salary * 20 ether / 100;
         }
     }
 
