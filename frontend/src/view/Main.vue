@@ -108,6 +108,10 @@ async function initEmployeeInfo() {
   employeeInfo.data.status = Number(data.status) + 2
   employeeInfo.data.contributionAmount = Number(data.contributionAmount / BigInt(1000000000000000000))
 
+  const erc20Contract = web3Provider.web3 ? new web3Provider.web3.eth.Contract(contractABIERC20, contractAddressERC20) : null
+  const balance = await erc20Contract.methods.balanceOf(connectedWalletAddress).call()
+  employeeInfo.data.balance = Number(balance / BigInt(1000000000000000000)) + ' SGD'
+
 }
 initEmployeeInfo()
 if (typeof window.ethereum !== 'undefined') {
