@@ -67,7 +67,7 @@ contract UnemploymentInsuranceTest is Test {
 
         // Confirm employment status by HR
         vm.prank(hrWallet);
-        insuranceContract.confirmEmploymentStatus(companyName, employeeWallet1);
+        insuranceContract.confirmEmploymentStatus(employeeWallet1);
 
         // Employee 1 pays premium for 4 months
         uint premium1 = insuranceContract.getEmployeeInfo(employeeWallet1).contributionAmount;
@@ -106,7 +106,7 @@ contract UnemploymentInsuranceTest is Test {
 
         // Confirm employment status by HR
         vm.prank(hrWallet);
-        insuranceContract.confirmEmploymentStatus(companyName, employeeWallet2);
+        insuranceContract.confirmEmploymentStatus(employeeWallet2);
 
         // Employee 2 pays premium but only for 2 months, should not be able to claim   <<<<<<<<<<<<<<<<<
         uint premium2 = insuranceContract.getEmployeeInfo(employeeWallet2).contributionAmount;
@@ -127,7 +127,7 @@ contract UnemploymentInsuranceTest is Test {
 
         // Confirm employment status by HR
         vm.prank(hrWallet);
-        insuranceContract.confirmEmploymentStatus(companyName, employeeWallet1);
+        insuranceContract.confirmEmploymentStatus(employeeWallet1);
 
         // Employee 1 pays premium for 4 months
         uint premium1 = insuranceContract.getEmployeeInfo(employeeWallet1).contributionAmount;
@@ -147,7 +147,7 @@ contract UnemploymentInsuranceTest is Test {
 
         // Confirm employment status by HR
         vm.prank(hrWallet);
-        insuranceContract.confirmEmploymentStatus(companyName, employeeWallet2);
+        insuranceContract.confirmEmploymentStatus(employeeWallet2);
 
         // Employee 2 pays premium but only for 2 months
         uint premium2 = insuranceContract.getEmployeeInfo(employeeWallet2).contributionAmount;

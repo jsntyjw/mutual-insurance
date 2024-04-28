@@ -147,8 +147,9 @@ contract UnemploymentInsurance {
     }
 
     // Function to confirm claim
-    function confirmClaim(string memory companyName, address employeeAddress) public {
-        bytes32 companyNameHash = generateNameHash(companyName);
+    function confirmClaim(address employeeAddress) public {
+        bytes32 companyNameHash = hrWallets[msg.sender];
+        require(companyNameHash != bytes32(0),"User is not a HR!");
         require(msg.sender == companiesByHash[companyNameHash].hrWallet, "Only HR can confirm the claim.");
         Employee storage employee = employees[employeeAddress];
         require(employee.status != 4, "Already claimed or exited!");
