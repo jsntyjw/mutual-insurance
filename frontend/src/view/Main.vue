@@ -30,7 +30,7 @@
         </div>
         <div class="flex flex-col items-center">
           <div class="mb-3 text-xl">{{employeeInfo.data.contributionAmount + ' SGD'}}</div>
-          <div @click="handleMonthlyPayment" :class="{'btn-disabled': (employeeInfo.data.status !== 3 && employeeInfo.data.status !== 4) || withinThreeMonthsStatus !== 'overdue' || withinThreeMonthsStatus !== 'available' }" class="btn btn-sm my-2">Confirm</div>
+          <div @click="handleMonthlyPayment" :class="{'btn-disabled': (employeeInfo.data.status !== 3 && employeeInfo.data.status !== 4) || (withinThreeMonthsStatus !== 'overdue'&& withinThreeMonthsStatus !== 'available') }" class="btn btn-sm my-2">Confirm</div>
         </div>
       </div>
 
