@@ -89,12 +89,11 @@ async function initEmployeeInfo() {
   if(!contract.data?.methods) {
     contract.data = web3Provider.web3 ? new web3Provider.web3.eth.Contract(contractABI, contractAddress) : null
   }
-  console.log(1)
 
   // Check if employee is registered
   const data = await contract.data.methods.getEmployeeInfo(connectedWalletAddress).call()
-  // console.log(data)
-  employeeInfo.data.name = data.emploeeName
+  console.log(data)
+  employeeInfo.data.name = data.employeeName
   employeeInfo.data.NRIC = data.nric
   employeeInfo.data.email = data.emailAddress
   employeeInfo.data.salary = Number(data.monthlySalary)
