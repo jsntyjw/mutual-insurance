@@ -50,6 +50,11 @@
     </div>
   </div>
   <div class="px-7 mt-8">
+    <div @click="faucet" class="btn btn-sm btn-info">
+      Faucet
+    </div>
+  </div>
+  <div class="px-7 mt-4">
     <div @click="exit" class="btn btn-sm btn-accent">
       EXIT THE INSURANCE
     </div>
@@ -179,6 +184,16 @@ async function handleMonthlyPayment() {
 const emit = defineEmits(['status-change'])
 import {useRouter} from 'vue-router'
 const router = useRouter()
+async function faucet() {
+  const accounts = await web3Provider.web3.eth.requestAccounts()
+  const connectedWalletAddress = accounts[0]
+  const erc20Contract = web3Provider.web3 ? new web3Provider.web3.eth.Contract(contractABIERC20, contractAddressERC20) : null
+  const res = await erc20Contract.methods.faucet().send({from: connectedWalletAddress})
+  console.log(res)
+  initEmployeeInfo();
+
+
+}
 async function exit() {
   const accounts = await web3Provider.web3.eth.requestAccounts()
   const connectedWalletAddress = accounts[0]
