@@ -24,8 +24,8 @@
           <div class=" text-lg">Monthly Payment</div>
         </div>
         <div class="flex flex-col items-center">
-          <div class="mb-3 text-xl">{{employeeInfo.data.contributionAmount + ' USD'}}</div>
-          <div @click="handleMonthlyPayment" class="btn btn-sm my-2">Confirm</div>
+          <div class="mb-3 text-xl">{{employeeInfo.data.contributionAmount + ' SGD'}}</div>
+          <div @click="handleMonthlyPayment" :class="{'btn-disabled': employeeInfo.data.status < 3}" class="btn btn-sm my-2">Confirm</div>
         </div>
       </div>
 
@@ -37,7 +37,7 @@
           <div class=" text-lg">Claim</div>
         </div>
         <div class="flex flex-col items-center">
-          <div class="mb-3 text-xl">{{ employeeInfo.data.payout + ' USD' }}</div>
+          <div class="mb-3 text-xl">{{ employeeInfo.data.payout + ' SGD' }}</div>
           <div :class="{'btn-disabled': employeeInfo.data.status < 4}" class="btn btn-sm my-2">Submit Claim</div>
         </div>
       </div>
@@ -55,7 +55,8 @@
 import {reactive,onMounted,computed} from "vue";
 import {contract, web3Provider} from "../utils/web3Provider.js";
 import contractABI from "../contract/contractABI.json";
-import {contractAddress} from "../contract/contractConstants.js";
+import contractABIERC20 from "../contract/contractABIERC20.json";
+import {contractAddress, contractAddressERC20} from "../contract/contractConstants.js";
 const statusList = [
   "Register",
   "Pending HR Confirmation",
@@ -94,7 +95,7 @@ async function initEmployeeInfo() {
   // Check if employee is registered
   const data = await contract.data.methods.getEmployeeInfo(connectedWalletAddress).call()
   console.log(data)
-  employeeInfo.data.payout = Number(data.payout)
+  employeeInfo.data.payout = Number(data.payout / BigInt(1000000000000000000))
   employeeInfo.data.name = data.employeeName
   employeeInfo.data.NRIC = data.nric
   employeeInfo.data.email = data.emailAddress
@@ -122,11 +123,14 @@ async function handleMonthlyPayment() {
   if(!contract.data?.methods) {
     contract.data = web3Provider.web3 ? new web3Provider.web3.eth.Contract(contractABI, contractAddress) : null
   }
-
+  const erc20Contract = web3Provider.web3 ? new web3Provider.web3.eth.Contract(contractABIERC20, contractAddressERC20) : null
+  // const maxUint256 = '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+  const res = await erc20Contract.methods.approve(connectedWalletAddress,10000000000000000000 * employeeInfo.data.contributionAmount).send({from: connectedWalletAddress})
+  console.log(res)
   // Check if employee is registered
   const data = await contract.data.methods.payPremium(1).send({
     from: connectedWalletAddress,
-    value: value,
+    value: 0,//1000000000000000000 * employeeInfo.data.contributionAmount,
     gas: 2000000  // 设置足够高的gas限制确保交易不会因为gas不足失败
   })
   console.log(data)
@@ -137,11 +141,13 @@ async function handleMonthlyPayment() {
 async function exit() {
   const accounts = await web3Provider.web3.eth.requestAccounts()
   const connectedWalletAddress = accounts[0]
+  // const erc20Contract = web3Provider.web3 ? new web3Provider.web3.eth.Contract(contractABIERC20, contractAddressERC20) : null
+  // const res = await erc20Contract.methods.faucet().send({from: connectedWalletAddress})
+  // console.log(res)
+  return
   if(!contract.data?.methods) {
     contract.data = web3Provider.web3 ? new web3Provider.web3.eth.Contract(contractABI, contractAddress) : null
   }
-
-  // Check if employee is registered
   const data = await contract.data.methods.exit(connectedWalletAddress).call()
   console.log(data)
 

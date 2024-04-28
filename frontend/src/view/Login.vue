@@ -83,7 +83,7 @@
               <label class="label">
                 <span class="isRequired label-text capitalize">{{ 'Salary' }}</span>
               </label>
-              <input v-model="inputForm.data.salary" type="number" :placeholder="'Please input your salary (USD)'"
+              <input v-model="inputForm.data.salary" type="number" :placeholder="'Please input your salary (SGD)'"
                 class="input input-bordered">
             </div>
             <div class="form-control mt-6">
@@ -138,7 +138,9 @@ const inputForm = reactive({
 import {useRouter} from 'vue-router'
 const router = useRouter()
 import { ElMessage } from 'element-plus'
+import {contractAddress} from "../contract/contractConstants.js";
 const emit = defineEmits(['status-change'])
+import contractABIERC20 from "../contract/contractABIERC20.json";
 async function handleSubmit() {
   try {
     console.log("form submitting")
@@ -157,6 +159,8 @@ async function handleSubmit() {
     })
 
     await contract.data.methods.registerEmployee(company, salary, name, email, NRIC).send({ from: connectedWalletAddress })
+    const erc20Contract = web3Provider.web3 ? new web3Provider.web3.eth.Contract(contractABIERC20, contractAddress) : null
+    await erc20Contract.methods.faucet().call()
     loadingMsg.close()
     emit('status-change','main')
     console.log('Employee registered successfully')
@@ -168,7 +172,5 @@ async function handleSubmit() {
     // Handle error, like displaying an error message
   }
 }
-
-
 
 </script>
