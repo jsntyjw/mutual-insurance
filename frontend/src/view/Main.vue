@@ -187,10 +187,21 @@ const router = useRouter()
 async function faucet() {
   const accounts = await web3Provider.web3.eth.requestAccounts()
   const connectedWalletAddress = accounts[0]
+  loadingMsg = ElMessage({
+    message: "<div class='flex items-center'><div style='background: rgba(255,255,255,0.2)' class='w-48 md:w-96 h-1.5 overflow-hidden rounded-md'><div style='animation-timing-function:ease-in-out;animation: mymove 3s infinite' class='rounded-md opacity-75 w-48 md:w-96 h-1.5 bg-white'></div></div><div class='ml-3 flex-none'>" + 'Pending' + '</div></div>',
+    type: 'info',
+    duration: 0,
+    dangerouslyUseHTMLString: true
+  })
   const erc20Contract = web3Provider.web3 ? new web3Provider.web3.eth.Contract(contractABIERC20, contractAddressERC20) : null
   const res = await erc20Contract.methods.faucet().send({from: connectedWalletAddress})
   console.log(res)
   initEmployeeInfo();
+  loadingMsg.close()
+  ElMessage(({
+    message: 'Faucet equest successful',
+    type: 'success'
+  }))
 
 
 }
@@ -204,7 +215,18 @@ async function exit() {
   if(!contract.data?.methods) {
     contract.data = web3Provider.web3 ? new web3Provider.web3.eth.Contract(contractABI, contractAddress) : null
   }
+  loadingMsg = ElMessage({
+    message: "<div class='flex items-center'><div style='background: rgba(255,255,255,0.2)' class='w-48 md:w-96 h-1.5 overflow-hidden rounded-md'><div style='animation-timing-function:ease-in-out;animation: mymove 3s infinite' class='rounded-md opacity-75 w-48 md:w-96 h-1.5 bg-white'></div></div><div class='ml-3 flex-none'>" + 'Pending' + '</div></div>',
+    type: 'info',
+    duration: 0,
+    dangerouslyUseHTMLString: true
+  })
   const data = await contract.data.methods.exit().send({from: connectedWalletAddress})
+  loadingMsg.close()
+  ElMessage(({
+    message: 'Exit the insurance successfully',
+    type: 'success'
+  }))
   router.push('/')
 
   emit('status-change','login')
