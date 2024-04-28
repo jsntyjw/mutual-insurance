@@ -140,6 +140,7 @@ contract UnemploymentInsurance {
         require(employee.status != 3, "Claim request already made, pending approval!");
         // require(block.timestamp > employee.verifiedTimestamp + 3 *30 days, "Claim request must be made 3 months after registration!");
         require(employee.status == 2, "Not eligible to claim yet!");
+        require(block.timestamp < employee.paymentTimestamps[0] + employee.monthsPaid * 30 days, "Insurance expired, please renew first!");
         employee.status = 3;    // Set status to Claim submitted
         emit EmployeeStatusChanged(msg.sender, employee.status);
         emit ClaimSubmitted(msg.sender);
@@ -269,5 +270,4 @@ contract UnemploymentInsurance {
             return salary * 20 ether / 100;
         }
     }
-
 }
