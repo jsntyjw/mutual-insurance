@@ -12,19 +12,11 @@ $ cd .\contracts\
 $ forge build
 ```
 
-# <<<<<<< HEAD
-
-> > > > > > > e20344a0d977bbcd6079e78bb143006605656bc3
-
 ## 测试
 
 ```shell
 $ forge test -vvv
 ```
-
-# <<<<<<< HEAD
-
-> > > > > > > e20344a0d977bbcd6079e78bb143006605656bc3
 
 ## 部署
 
@@ -32,7 +24,7 @@ $ forge test -vvv
 
 ##### Sepolia：
 
-0x58B1e6F7BC643bA1898d88AE2404050D19D3797a
+0xB07CaA395814FF99EbFb8cb77DF2466B639FCbf5
 
 ### 本地测试节点部署：
 
@@ -91,11 +83,6 @@ $ forge script script/DeployUnemploymentInsurance.s.sol:DeployUnemploymentInsura
 
 ```
 
-### Build
-
-```shell
-$ forge build
-```
 
 ### Format
 

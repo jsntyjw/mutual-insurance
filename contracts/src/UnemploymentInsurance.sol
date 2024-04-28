@@ -11,10 +11,13 @@ contract UnemploymentInsurance {
     // ERC20 token
     address SGDTAddress = 0xa5Eeb3661ED2FA716E7DB8A9B8ec5d07274d4a71;
     SGDT SGDToken = SGDT(SGDTAddress);
+    // address private SGDTAddress;
+    // SGDT SGDToken;
 
     struct Employee {
         address walletAddress;
         string employeeName;
+        string companyName;
         string emailAddress;
         string nric;
         uint256 monthlySalary;
@@ -22,10 +25,22 @@ contract UnemploymentInsurance {
         uint payout;
         uint[] paymentTimestamps;
         uint monthsPaid;
-        uint8 status; // 0 - Registered but not confirmed, 1 - Confirmed but not enough payments, 2 - Eligible for claim, 3 - Claim submitted, 4 - Claimed or exited
+        uint8 status; 
         uint verifiedTimestamp;
         uint registerTimestamp;
     }
+
+    /**
+        status:
+        0 - 空用户，未注册（Unregistered）
+        1 - 已注册，HR未验证（Pending HR Comfirmation）
+        2 - HR已验证，3月等待期未过（Waiting Period）
+        3 - 3月等待期已过，只要没欠费就能claim（Active）
+        4 - 已经提交Claim（Claim Submitted）
+        5 - 理赔完成（Claim Comfirmed）
+        6 - 欠费过久，被踢出保险计划（Terminated）
+        任何时候手动退出计划，状态回到 0 - Unregistered
+     */
 
     struct Company {
         address hrWallet;
@@ -34,7 +49,7 @@ contract UnemploymentInsurance {
         address[] employeeAddresses;
     }
 
-    uint verifyWaitingTime = 30 seconds;
+    uint public verifyWaitingTime = 30 seconds;
 
 
     mapping(bytes32 => Company) public companiesByHash;
@@ -50,11 +65,16 @@ contract UnemploymentInsurance {
     event EmployeeExited(address indexed employeeAddress);
 
 
-
-    // constructor() Ownable(msg.sender) { }
     constructor() {
         _owner = msg.sender;
     }
+    // constructor() Ownable(msg.sender) { }
+    // constructor(address SGDAddr) {
+    //     _owner = msg.sender;
+    //     SGDTAddress = SGDAddr;
+    //     SGDToken = SGDT(SGDTAddress);
+
+    // }
     modifier onlyOwner(){
         require(_owner == msg.sender, "Only the owner of the contract can add company");
         _;
@@ -81,7 +101,8 @@ contract UnemploymentInsurance {
         company.employeeAddresses.push(msg.sender);
         uint payout = calculatePayout(salary);
         uint contributionAmount = determineContribution(salary);
-        employees[msg.sender] = Employee(msg.sender, employeeName, emailAddress, nric, salary, contributionAmount, payout, new uint[](0), 0, 0, 0, block.timestamp);
+        employees[msg.sender] = Employee(msg.sender, employeeName, companyName, emailAddress, nric, salary, contributionAmount, payout, new uint[](0), 0, 1, 0, block.timestamp);
+        emit EmployeeStatusChanged(msg.sender, employees[msg.sender].status);
         emit EmployeeRegistered(msg.sender, companyName);
     }
 
@@ -90,9 +111,10 @@ contract UnemploymentInsurance {
         bytes32 companyNameHash = hrWallets[msg.sender];
         require(msg.sender == companiesByHash[companyNameHash].hrWallet, "Only HR can confirm employment status.");
         Employee storage employee = employees[employeeAddress];
-        employee.status = 1;    // Set status to Confirmed but not enough payments
+        require(employee.status == 1, "No need to confirm Employment Status.");
+        employee.status = 2;    // Set status to "Waiting Period"
         employee.verifiedTimestamp = block.timestamp;
-        emit EmployeeStatusChanged(employeeAddress, 1);
+        emit EmployeeStatusChanged(employeeAddress, employee.status);
     }
 
     // Function to pay premium
@@ -101,47 +123,41 @@ contract UnemploymentInsurance {
         if (employee.paymentTimestamps.length != 0) {
             checkPaymentOverdue(msg.sender);
         }
-        require(employee.status != 4, "Already claimed or exited!");
-        require(employee.status != 0, "Registration not confirmed yet!");
-        require(employee.status != 3, "Claim request already made, pending approval!");
-        require(employee.status == 1 || employee.status == 2, "Not in a valid state to pay premiums.");
+        require(employee.status != 0, "Not Registered!");
+        require(employee.status != 1, "Registration not confirmed yet!");
+        require(employee.status != 4, "Claim request already made, pending approval!");
+        require(employee.status != 5, "Already claimed!");
+        require(employee.status != 6, "Terminated due to unpaid premiums overdue!");
+        require(employee.status == 2 || employee.status == 3, "Not in a valid state to pay premiums.");
         // require(msg.value == employee.contributionAmount * months, "Incorrect premium amount.");
-        uint payAmount = employee.contributionAmount * months;
-        require(SGDToken.allowance(msg.sender, address(this)) >= payAmount, "SGDT allowance is not enough.");
-        require(SGDToken.balanceOf(msg.sender) >= payAmount, "Balance not enough");
-        require(SGDToken.transferFrom(msg.sender, address(this), payAmount), "Deposit failed");
+        uint newAmountPaid = employee.contributionAmount * months;
+        require(SGDToken.allowance(msg.sender, address(this)) >= newAmountPaid, "SGDT allowance is not enough.");
+        require(SGDToken.balanceOf(msg.sender) >= newAmountPaid, "Balance not enough");
+        require(SGDToken.transferFrom(msg.sender, address(this), newAmountPaid), "Deposit failed");
         for (uint i = 0; i < months; i++) {
             employee.paymentTimestamps.push(block.timestamp);
         }
         employee.monthsPaid += months;
-        updateEligibilityForCompensation(msg.sender);
-        emit PremiumPaid(msg.sender, msg.value, block.timestamp);
+        checkEnoughWaitingTime(msg.sender);
+        emit PremiumPaid(msg.sender, newAmountPaid, block.timestamp);
     }
 
-
-    function updateEligibilityForCompensation(address employeeAddress) public {
-        Employee storage employee = employees[employeeAddress];
-        require(employee.status != 4, "Already claimed or exited!");
-        if (employee.monthsPaid >= 3 && block.timestamp > employee.verifiedTimestamp + verifyWaitingTime){
-            employee.status = 2;
-            emit EmployeeStatusChanged(msg.sender, employee.status);
-        }
-    }
 
 
     // Function to submit a claim
     function submitClaim() public {
-        updateEligibilityForCompensation(msg.sender);
         checkPaymentOverdue(msg.sender);
+        checkEnoughWaitingTime(msg.sender);
         Employee storage employee = employees[msg.sender];
-        require(employee.status != 4, "Already claimed or exited!");
-        require(employee.status != 0, "Registration not confirmed yet!");
-        require(employee.status != 1, "Not enough monthly payments made or not enough time after enrolled!");
-        require(employee.status != 3, "Claim request already made, pending approval!");
-        // require(block.timestamp > employee.verifiedTimestamp + 3 *30 days, "Claim request must be made 3 months after registration!");
-        require(employee.status == 2, "Not eligible to claim yet!");
+        require(employee.status != 0, "Not Registered!");
+        require(employee.status != 1, "Registration not confirmed yet!");
+        require(employee.status != 2, "Still in Waiting Period!");
+        require(employee.status != 4, "Claim request already made, pending approval!");
+        require(employee.status != 5, "Already claimed!");
+        require(employee.status != 6, "Terminated due to unpaid premiums overdue!");
+        require(employee.status == 3, "Invalid Status!");
         require(block.timestamp < employee.paymentTimestamps[0] + employee.monthsPaid * 30 days, "Insurance expired, please renew first!");
-        employee.status = 3;    // Set status to Claim submitted
+        employee.status = 4;    // Set status to "Claim submitted"
         emit EmployeeStatusChanged(msg.sender, employee.status);
         emit ClaimSubmitted(msg.sender);
     }
@@ -152,13 +168,17 @@ contract UnemploymentInsurance {
         require(companyNameHash != bytes32(0),"User is not a HR!");
         require(msg.sender == companiesByHash[companyNameHash].hrWallet, "Only HR can confirm the claim.");
         Employee storage employee = employees[employeeAddress];
-        require(employee.status != 4, "Already claimed or exited!");
-        require(employee.status == 3, "No submitted claim!");
-        // require(address(this).balance >= employee.payout, "Insufficient funds.");
-        // payable(employeeAddress).transfer(employee.payout);
+        checkEnoughWaitingTime(msg.sender);
+        require(employee.status != 0, "Not Registered!");
+        require(employee.status != 1, "Registration not confirmed yet!");
+        require(employee.status != 2, "Still in Waiting Period!");
+        require(employee.status != 5, "Already claimed!");
+        require(employee.status != 6, "Terminated due to unpaid premiums overdue!");
+        require(employee.status == 4, "No submitted claim found!");
+
         require(SGDToken.balanceOf(address(this)) > employee.payout, "Insufficient funds in pool.");
         require(SGDToken.transfer(employeeAddress, employee.payout), "Unable to transfer.");
-        employee.status = 4;    // Set status to Claimed or exited
+        employee.status = 5;    // Set status to "Claim Comfirmed"
         emit EmployeeStatusChanged(employeeAddress, employee.status);
         emit ClaimConfirmed(employeeAddress, employee.payout);
     }
@@ -166,7 +186,17 @@ contract UnemploymentInsurance {
     // Function to exit the insurance system
     function exit() public {
         Employee storage employee = employees[msg.sender];
-        employee.status = 4;    // Set status to Claimed or exited
+
+        bytes32 companyNameHash = generateNameHash(employee.companyName);
+        Company storage company = companiesByHash[companyNameHash];
+        for (uint i = 0; i < company.employeeAddresses.length; i++) {
+            if (company.employeeAddresses[i] == msg.sender) {
+                company.employeeAddresses[i] = company.employeeAddresses[company.employeeAddresses.length - 1];
+                company.employeeAddresses.pop();
+            }
+        }
+        employee.companyName = "";
+        employee.status = 0;    // Set status to "Unregistered"
         emit EmployeeStatusChanged(msg.sender, employee.status);
         emit EmployeeExited(msg.sender);
     }
@@ -190,15 +220,9 @@ contract UnemploymentInsurance {
         return companiesByHash[companyNameHash];
     }
 
-    // View function to get the addresses of employees of a certain compony
-    function getAddressByCompanyName(string memory companyName) public view returns (address[] memory) {
-        bytes32 companyNameHash = generateNameHash(companyName);
-        return companiesByHash[companyNameHash].employeeAddresses;
-    }
-
     // View funtion to get the address's identity (employee or hr)
     function getAddressIdentity() public view returns (string memory) {
-        if (hrWallets[msg.sender] == 0x0000000000000000000000000000000000000000000000000000000000000000) {
+        if (hrWallets[msg.sender] == 0x0) {
             return "employee";
         } else {
             bytes32 companyNameHash = hrWallets[msg.sender];
@@ -210,7 +234,7 @@ contract UnemploymentInsurance {
     // View funtion to get all employee information by company name
     function getAllEmployeeByCompanyName() public view returns (Employee[] memory) {
         bytes32 companyNameHash = hrWallets[msg.sender];
-        require(companyNameHash != 0x0000000000000000000000000000000000000000000000000000000000000000, "Only HR can view employee information of the company.");
+        require(companyNameHash != 0x0, "Only HR can view employee information of the company.");
         Company storage company = companiesByHash[companyNameHash];
         Employee[] memory employeeByCompanyName = new Employee[](company.employeeAddresses.length);
         for (uint i = 0; i < company.employeeAddresses.length; i++) {
@@ -235,8 +259,20 @@ contract UnemploymentInsurance {
     // Helper function to check if the employ has exceeded the 3 month limit after last payment before each action
     function checkPaymentOverdue(address employeeAddress) public {
         Employee storage employee = employees[employeeAddress];
+        require(employee.status != 0, "Not Registered!");
+        require(employee.status != 5, "Already claimed!");
         if (block.timestamp > employee.paymentTimestamps[0] + employee.monthsPaid * 30 days + 3 *30 days) {
-            employee.status = 4;    // Set status to claimed or exited due to non-payment
+            employee.status = 6;    // Set status to "Terminated" due to not paid for too long
+            emit EmployeeStatusChanged(employeeAddress, employee.status);
+        }
+    }
+    
+    // Helper function to check if the waiting time has passed
+    function checkEnoughWaitingTime(address employeeAddress) public {
+        Employee storage employee = employees[employeeAddress];
+        require(employee.paymentTimestamps.length != 0,"Please Pay to activate your Insurance!");
+        if (employee.status == 2 && block.timestamp > employee.verifiedTimestamp + verifyWaitingTime) {
+            employee.status = 3;    // Set status to "Active"
             emit EmployeeStatusChanged(employeeAddress, employee.status);
         }
     }
