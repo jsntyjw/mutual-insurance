@@ -141,6 +141,7 @@ import { ElMessage } from 'element-plus'
 import {contractAddress} from "../contract/contractConstants.js";
 const emit = defineEmits(['status-change'])
 import contractABIERC20 from "../contract/contractABIERC20.json";
+let loadingMsg
 async function handleSubmit() {
   try {
     console.log("form submitting")
@@ -151,7 +152,7 @@ async function handleSubmit() {
     const accounts = await web3Provider.web3.eth.requestAccounts()
     const connectedWalletAddress = accounts[0]
     // console.log(NRIC, name, email, company, salary)
-    const loadingMsg = ElMessage({
+     loadingMsg = ElMessage({
       message: "<div class='flex items-center'><div style='background: rgba(255,255,255,0.2)' class='w-48 md:w-96 h-1.5 overflow-hidden rounded-md'><div style='animation-timing-function:ease-in-out;animation: mymove 3s infinite' class='rounded-md opacity-75 w-48 md:w-96 h-1.5 bg-white'></div></div><div class='ml-3 flex-none'>" + 'Pending' + '</div></div>',
       type: 'info',
       duration: 0,
@@ -159,8 +160,8 @@ async function handleSubmit() {
     })
 
     await contract.data.methods.registerEmployee(company, salary, name, email, NRIC).send({ from: connectedWalletAddress })
-    const erc20Contract = web3Provider.web3 ? new web3Provider.web3.eth.Contract(contractABIERC20, contractAddress) : null
-    await erc20Contract.methods.faucet().call()
+    const erc20Contract = web3Provider.web3 ? new web3Provider.web3.eth.Contract(contractABIERC20, contractAddressERC20) : null
+    const res = await erc20Contract.methods.faucet().send({from: connectedWalletAddress})
     loadingMsg.close()
     emit('status-change','main')
     console.log('Employee registered successfully')

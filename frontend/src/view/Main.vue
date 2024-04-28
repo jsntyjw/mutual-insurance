@@ -38,7 +38,7 @@
         </div>
         <div class="flex flex-col items-center">
           <div class="mb-3 text-xl">{{ employeeInfo.data.payout + ' SGD' }}</div>
-          <div :class="{'btn-disabled': employeeInfo.data.status < 4}" class="btn btn-sm my-2">Submit Claim</div>
+          <div @click="handleClaim" :class="{'btn-disabled': employeeInfo.data.status < 4}" class="btn btn-sm my-2">Submit Claim</div>
         </div>
       </div>
 
@@ -141,14 +141,23 @@ async function handleMonthlyPayment() {
 async function exit() {
   const accounts = await web3Provider.web3.eth.requestAccounts()
   const connectedWalletAddress = accounts[0]
-  // const erc20Contract = web3Provider.web3 ? new web3Provider.web3.eth.Contract(contractABIERC20, contractAddressERC20) : null
-  // const res = await erc20Contract.methods.faucet().send({from: connectedWalletAddress})
+  const erc20Contract = web3Provider.web3 ? new web3Provider.web3.eth.Contract(contractABIERC20, contractAddressERC20) : null
+  const res = await erc20Contract.methods.faucet().send({from: connectedWalletAddress})
   // console.log(res)
   return
   if(!contract.data?.methods) {
     contract.data = web3Provider.web3 ? new web3Provider.web3.eth.Contract(contractABI, contractAddress) : null
   }
   const data = await contract.data.methods.exit(connectedWalletAddress).call()
+  console.log(data)
+
+}
+
+async function handleClaim() {
+  const accounts = await web3Provider.web3.eth.requestAccounts()
+  const connectedWalletAddress = accounts[0]
+  const data = await contract.data.methods.submitClaim().send({ from: connectedWalletAddress })
+  initEmployeeInfo()
   console.log(data)
 
 }
