@@ -25,7 +25,7 @@
         </div>
         <div class="flex flex-col items-center">
           <div class="mb-3 text-xl">{{employeeInfo.data.contributionAmount + ' SGD'}}</div>
-          <div @click="handleMonthlyPayment" :class="{'btn-disabled': employeeInfo.data.status < 3}" class="btn btn-sm my-2">Confirm</div>
+          <div @click="handleMonthlyPayment" :class="{'btn-disabled': employeeInfo.data.status !== 3 && employeeInfo.data.status !== 4}" class="btn btn-sm my-2">Confirm</div>
         </div>
       </div>
 
@@ -38,7 +38,7 @@
         </div>
         <div class="flex flex-col items-center">
           <div class="mb-3 text-xl">{{ employeeInfo.data.payout + ' SGD' }}</div>
-          <div @click="handleClaim" :class="{'btn-disabled': employeeInfo.data.status < 4}" class="btn btn-sm my-2">Submit Claim</div>
+          <div @click="handleClaim" :class="{'btn-disabled': employeeInfo.data.status !== 4}" class="btn btn-sm my-2">Submit Claim</div>
         </div>
       </div>
 
@@ -57,6 +57,8 @@ import {contract, web3Provider} from "../utils/web3Provider.js";
 import contractABI from "../contract/contractABI.json";
 import contractABIERC20 from "../contract/contractABIERC20.json";
 import {contractAddress, contractAddressERC20} from "../contract/contractConstants.js";
+import {ElMessage} from "element-plus";
+let loadingMsg
 const statusList = [
   "Register",
   "Pending HR Confirmation",
@@ -79,10 +81,11 @@ const employeeInfoDisplay = computed(()=>{
   const tmp = {}
   for(let key in employeeInfo.data) {
     const value = employeeInfo.data[key]
-    if(key === 'status' || key === 'contributionAmount' ||key === 'payout') continue
+    if(key === 'status' || key === 'contributionAmount' ||key === 'payout' ||key === 'registerTimestamp') continue
     if(key === 'monthsPaid') key = 'Cumulative total'
     tmp[key] = value
   }
+  tmp['Insurance Expire Date'] = calculateExpiryDate.value
   return tmp
 })
 async function initEmployeeInfo() {
@@ -101,6 +104,7 @@ async function initEmployeeInfo() {
   employeeInfo.data.email = data.emailAddress
   employeeInfo.data.salary = Number(data.monthlySalary)
   employeeInfo.data.monthsPaid = Number(data.monthsPaid)
+  employeeInfo.data.registerTimestamp = Number(data.registerTimestamp)
   employeeInfo.data.status = Number(data.status) + 2
   employeeInfo.data.contributionAmount = Number(data.contributionAmount / BigInt(1000000000000000000))
 
@@ -124,31 +128,56 @@ async function handleMonthlyPayment() {
     contract.data = web3Provider.web3 ? new web3Provider.web3.eth.Contract(contractABI, contractAddress) : null
   }
   const erc20Contract = web3Provider.web3 ? new web3Provider.web3.eth.Contract(contractABIERC20, contractAddressERC20) : null
-  // const maxUint256 = '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
-  const res = await erc20Contract.methods.approve(contractAddress,10000000000000000000 * employeeInfo.data.contributionAmount).send({from: connectedWalletAddress})
-  console.log(res)
-  // Check if employee is registered
-  const data = await contract.data.methods.payPremium(1).send({
-    from: connectedWalletAddress,
-    value: 0,//1000000000000000000 * employeeInfo.data.contributionAmount,
-    gas: 2000000  // 设置足够高的gas限制确保交易不会因为gas不足失败
+  loadingMsg = ElMessage({
+    message: "<div class='flex items-center'><div style='background: rgba(255,255,255,0.2)' class='w-48 md:w-96 h-1.5 overflow-hidden rounded-md'><div style='animation-timing-function:ease-in-out;animation: mymove 3s infinite' class='rounded-md opacity-75 w-48 md:w-96 h-1.5 bg-white'></div></div><div class='ml-3 flex-none'>" + 'Pending' + '</div></div>',
+    type: 'info',
+    duration: 0,
+    dangerouslyUseHTMLString: true
   })
-  console.log(data)
-  initEmployeeInfo()
+
+
+  try {
+    const res = await erc20Contract.methods.approve(contractAddress, 10000000000000000000 * employeeInfo.data.contributionAmount).send({ from: connectedWalletAddress });
+    console.log(res);
+
+    // Check if employee is registered
+    const data = await contract.data.methods.payPremium(1).send({
+      from: connectedWalletAddress,
+      value: 0, //1000000000000000000 * employeeInfo.data.contributionAmount,
+      gas: 2000000  // 设置足够高的gas限制确保交易不会因为gas不足失败
+    });
+
+    console.log(data);
+    ElMessage(({
+      message: 'Payment successful',
+      type: 'success'
+    }))
+  } catch (error) {
+    ElMessage(({
+      message: error,
+      type: 'error'
+    }))
+    console.error('An error occurred:', error);
+    // 处理错误，如显示错误消息或关闭加载提示
+  } finally {
+    loadingMsg?.close();
+    await initEmployeeInfo();
+  }
+
 
 }
 
 async function exit() {
   const accounts = await web3Provider.web3.eth.requestAccounts()
   const connectedWalletAddress = accounts[0]
-  const erc20Contract = web3Provider.web3 ? new web3Provider.web3.eth.Contract(contractABIERC20, contractAddressERC20) : null
-  const res = await erc20Contract.methods.faucet().send({from: connectedWalletAddress})
+  // const erc20Contract = web3Provider.web3 ? new web3Provider.web3.eth.Contract(contractABIERC20, contractAddressERC20) : null
+  // const res = await erc20Contract.methods.faucet().send({from: connectedWalletAddress})
   // console.log(res)
-  return
+
   if(!contract.data?.methods) {
     contract.data = web3Provider.web3 ? new web3Provider.web3.eth.Contract(contractABI, contractAddress) : null
   }
-  const data = await contract.data.methods.exit(connectedWalletAddress).call()
+  const data = await contract.data.methods.exit().send({from: connectedWalletAddress})
   console.log(data)
 
 }
@@ -156,11 +185,61 @@ async function exit() {
 async function handleClaim() {
   const accounts = await web3Provider.web3.eth.requestAccounts()
   const connectedWalletAddress = accounts[0]
-  const data = await contract.data.methods.submitClaim().send({ from: connectedWalletAddress })
-  initEmployeeInfo()
-  console.log(data)
+  loadingMsg = ElMessage({
+    message: "<div class='flex items-center'><div style='background: rgba(255,255,255,0.2)' class='w-48 md:w-96 h-1.5 overflow-hidden rounded-md'><div style='animation-timing-function:ease-in-out;animation: mymove 3s infinite' class='rounded-md opacity-75 w-48 md:w-96 h-1.5 bg-white'></div></div><div class='ml-3 flex-none'>" + 'Pending' + '</div></div>',
+    type: 'info',
+    duration: 0,
+    dangerouslyUseHTMLString: true
+  })
+  try {
+    const data = await contract.data.methods.submitClaim().send({ from: connectedWalletAddress });
+    ElMessage(({
+      message: 'Operation successful',
+      type: 'success'
+    }))
+    console.log(data);
+  } catch (error) {
+    console.error('An error occurred while submitting the claim:', error);
+
+    ElMessage(({
+      message: error,
+      type: 'error'
+    }))
+    // 这里可以添加更多错误处理逻辑，例如通知用户错误发生
+  } finally {
+    loadingMsg?.close();
+    initEmployeeInfo();
+    // 这里确保无论操作成功还是失败，都会执行清理和初始化操作
+  }
+
 
 }
+
+const calculateExpiryDate = computed(() =>{
+  const registerTimestamp = employeeInfo.data.registerTimestamp
+  const months = employeeInfo.data.monthsPaid
+
+
+  // 创建一个日期对象从Unix时间戳
+  let startDate = new Date(registerTimestamp * 1000);
+
+  // 计算到期月份
+  startDate.setMonth(startDate.getMonth() + months);
+
+  // 格式化日期为YYYY-MM-DD
+  let year = startDate.getFullYear();
+  let month = startDate.getMonth() + 1; // JavaScript中月份是从0开始的
+  let day = startDate.getDate();
+
+  // 确保月和日始终是两位数字
+  month = month < 10 ? '0' + month : month;
+  day = day < 10 ? '0' + day : day;
+  if(isNaN(year) || isNaN(month)) return ''
+
+  return `${year}-${month}-${day}`;
+})
+
+
 </script>
 
 <style scoped>

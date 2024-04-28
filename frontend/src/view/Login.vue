@@ -116,6 +116,7 @@ function handleSubmit() {
 <script setup>
 import { reactive, onMounted } from 'vue'
 import { web3Provider,contract } from '../utils/web3Provider.js' // Import your web3Provider
+import {contractAddressERC20} from "../contract/contractConstants.js";
 
 
 const inputForm = reactive({
@@ -138,10 +139,10 @@ const inputForm = reactive({
 import {useRouter} from 'vue-router'
 const router = useRouter()
 import { ElMessage } from 'element-plus'
+let loadingMsg
 import {contractAddress} from "../contract/contractConstants.js";
 const emit = defineEmits(['status-change'])
 import contractABIERC20 from "../contract/contractABIERC20.json";
-let loadingMsg
 async function handleSubmit() {
   try {
     console.log("form submitting")
@@ -163,6 +164,10 @@ async function handleSubmit() {
     const erc20Contract = web3Provider.web3 ? new web3Provider.web3.eth.Contract(contractABIERC20, contractAddressERC20) : null
     const res = await erc20Contract.methods.faucet().send({from: connectedWalletAddress})
     loadingMsg.close()
+    ElMessage(({
+      message: 'Register successfully',
+      type: 'success'
+    }))
     emit('status-change','main')
     console.log('Employee registered successfully')
     router.push('/main')

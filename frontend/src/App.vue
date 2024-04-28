@@ -8,6 +8,8 @@ import HR from './view/HR.vue';
 import ChangeTheme from './components/ChangeTheme.vue';
 import contractABI from "./contract/contractABI.json";
 import { contractAddress } from "./contract/contractConstants.js";
+import { ElMessage } from 'element-plus'
+let loadingMsg
 
 // Reactive references for account and web3 instance
 const account = ref(null);
