@@ -125,7 +125,7 @@ async function handleMonthlyPayment() {
   }
   const erc20Contract = web3Provider.web3 ? new web3Provider.web3.eth.Contract(contractABIERC20, contractAddressERC20) : null
   // const maxUint256 = '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
-  const res = await erc20Contract.methods.approve(connectedWalletAddress,10000000000000000000 * employeeInfo.data.contributionAmount).send({from: connectedWalletAddress})
+  const res = await erc20Contract.methods.approve(contractAddress,10000000000000000000 * employeeInfo.data.contributionAmount).send({from: connectedWalletAddress})
   console.log(res)
   // Check if employee is registered
   const data = await contract.data.methods.payPremium(1).send({
