@@ -5,14 +5,19 @@
     <div class=" text-lg">Employee Info & Status</div>
   </div>
     <div class="w-full ">
-      <div class="w-full flex flex-wrap   mt-3 mb-6">
+      <div class="w-full flex flex-wrap   mt-3 mb-5">
           <div v-for="(value,key) in employeeInfoDisplay" :key="key" class="w-full sm:w-1/2 xl:w-1/3 justify-between">
             {{key + ' : ' + value}}
           </div>
 
       </div>
-      <ul className="steps mx-10 steps-vertical sm:steps-horizontal">
-        <li v-for="(item,index) in statusList" :key="index" :class="{ 'step-primary' : index < employeeInfo.data.status }" class="step">{{item }}</li>
+      <div v-if="withinThreeMonthsStatus === 'exit'">
+        <div class="text-error font-bold text-lg">
+          You have not paid your insurance premiums for over three months, and have been removed from the insurance plan!
+        </div>
+      </div>
+      <ul className="steps mt-8 mx-10 steps-vertical sm:steps-horizontal">
+        <li v-for="(item,index) in statusList" :key="index" :class="{ 'step-primary' : index < employeeInfo.data.status && withinThreeMonthsStatus !== 'exit' }" class="step">{{item }}</li>
       </ul>
     </div>
   </div>
@@ -25,7 +30,7 @@
         </div>
         <div class="flex flex-col items-center">
           <div class="mb-3 text-xl">{{employeeInfo.data.contributionAmount + ' SGD'}}</div>
-          <div @click="handleMonthlyPayment" :class="{'btn-disabled': employeeInfo.data.status !== 3 && employeeInfo.data.status !== 4}" class="btn btn-sm my-2">Confirm</div>
+          <div @click="handleMonthlyPayment" :class="{'btn-disabled': (employeeInfo.data.status !== 3 && employeeInfo.data.status !== 4) || withinThreeMonthsStatus !== 'overdue' || withinThreeMonthsStatus !== 'available' }" class="btn btn-sm my-2">Confirm</div>
         </div>
       </div>
 
@@ -38,7 +43,7 @@
         </div>
         <div class="flex flex-col items-center">
           <div class="mb-3 text-xl">{{ employeeInfo.data.payout + ' SGD' }}</div>
-          <div @click="handleClaim" :class="{'btn-disabled': employeeInfo.data.status !== 4}" class="btn btn-sm my-2">Submit Claim</div>
+          <div @click="handleClaim" :class="{'btn-disabled': employeeInfo.data.status !== 4 || withinThreeMonthsStatus !== 'available'}" class="btn btn-sm my-2">Submit Claim</div>
         </div>
       </div>
 
@@ -102,7 +107,7 @@ async function initEmployeeInfo() {
   employeeInfo.data.name = data.employeeName
   employeeInfo.data.NRIC = data.nric
   employeeInfo.data.email = data.emailAddress
-  employeeInfo.data.salary = Number(data.monthlySalary)
+  employeeInfo.data.salary = Number(data.monthlySalary) + ' SGD'
   employeeInfo.data.monthsPaid = Number(data.monthsPaid)
   employeeInfo.data.registerTimestamp = Number(data.registerTimestamp)
   employeeInfo.data.status = Number(data.status) + 2
@@ -170,7 +175,8 @@ async function handleMonthlyPayment() {
 
 
 }
-
+import {useRouter} from 'vue-router'
+const router = useRouter()
 async function exit() {
   const accounts = await web3Provider.web3.eth.requestAccounts()
   const connectedWalletAddress = accounts[0]
@@ -182,6 +188,7 @@ async function exit() {
     contract.data = web3Provider.web3 ? new web3Provider.web3.eth.Contract(contractABI, contractAddress) : null
   }
   const data = await contract.data.methods.exit().send({from: connectedWalletAddress})
+  router.push('/')
   console.log(data)
 
 }
@@ -218,6 +225,30 @@ async function handleClaim() {
 
 
 }
+const withinThreeMonthsStatus = computed(()=>{
+  // return 'exit'
+  if(calculateExpiryDate.value === '') return ''
+  const [year,month,day] = calculateExpiryDate.value.split('-')
+
+  // 创建给定日期的Date对象
+  // 注意JavaScript中的月份是从0开始的，所以需要month - 1
+  const givenDate = new Date(year, month - 1, day);
+
+  // 获取当前日期
+  const currentDate = new Date();
+
+  // 计算两个日期的毫秒差
+  const differenceInMilliseconds = currentDate - givenDate;
+
+  // 将毫秒转换为天数（1天 = 86400000毫秒）
+  const differenceInDays = differenceInMilliseconds / (1000 * 60 * 60 * 24);
+
+  if(differenceInDays <= 0) return 'available'
+  if(differenceInDays > 90) return 'exit'
+  return 'overdue'
+
+
+})
 
 const calculateExpiryDate = computed(() =>{
   const registerTimestamp = employeeInfo.data.registerTimestamp
