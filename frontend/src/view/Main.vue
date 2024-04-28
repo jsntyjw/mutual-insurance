@@ -110,7 +110,7 @@ async function initEmployeeInfo() {
   employeeInfo.data.salary = Number(data.monthlySalary) + ' SGD'
   employeeInfo.data.monthsPaid = Number(data.monthsPaid)
   employeeInfo.data.registerTimestamp = Number(data.registerTimestamp)
-  employeeInfo.data.status = Number(data.status) + 2
+  employeeInfo.data.status = Number(data.status) + 1
   employeeInfo.data.contributionAmount = Number(data.contributionAmount / BigInt(1000000000000000000))
 
   const erc20Contract = web3Provider.web3 ? new web3Provider.web3.eth.Contract(contractABIERC20, contractAddressERC20) : null
@@ -175,6 +175,8 @@ async function handleMonthlyPayment() {
 
 
 }
+
+const emit = defineEmits(['status-change'])
 import {useRouter} from 'vue-router'
 const router = useRouter()
 async function exit() {
@@ -189,6 +191,9 @@ async function exit() {
   }
   const data = await contract.data.methods.exit().send({from: connectedWalletAddress})
   router.push('/')
+
+  emit('status-change','login')
+
   console.log(data)
 
 }

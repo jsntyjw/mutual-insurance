@@ -59,21 +59,21 @@ const router = useRouter()
 const navBarStatus = ref('')
 
 function handleStatusChange(val) {
+  console.log(val)
   navBarStatus.value = val
 }
 async function checkEmployeeRegistered() {
   try {
-    // Get connected wallet address
     const accounts = await web3Provider.web3.eth.requestAccounts()
     const connectedWalletAddress = accounts[0]
     if (!contract.data?.methods) return
 
-    // Check if employee is registered
     const userType = await contract.data.methods.getAddressIdentity().call({ from: connectedWalletAddress })
     if (userType === 'employee') {
       console.log('user type is employee')
       const employeeInfo = await contract.data.methods.getEmployeeInfo(connectedWalletAddress).call()
-      if (employeeInfo["emailAddress"]) {
+      if (employeeInfo["emailAddress"] && Number(employeeInfo['status'])) {
+        // alert(Number(employeeInfo['status']))
 
         router.push('/main')
         console.log('Employee already registered')
@@ -82,9 +82,7 @@ async function checkEmployeeRegistered() {
         console.log('Employee not registered')
         router.push('/')
         navBarStatus.value = 'login'
-
       }
-      // Do something if employee is already registered, like displaying a message
     } else {
       router.push('/hr')
       console.log('connect wallet address is HR')
