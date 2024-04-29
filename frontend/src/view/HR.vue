@@ -55,7 +55,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { ElTable, ElTableColumn, ElButton } from 'element-plus';
+import {ElTable, ElTableColumn, ElButton, ElMessage} from 'element-plus';
 import { web3Provider } from '../utils/web3Provider.js';
 import { contractAddress } from '../contract/contractConstants.js';
 import contractABI from '../contract/contractABI.json';
@@ -106,16 +106,32 @@ async function getEmployeeInformation() {
     console.error('Error getEmployeeInformation:', error);
   }
 }
-
+let loadingMsg
 async function confirmEmploymentStatus(employeeAddress) {
   try {
     const accounts = await web3Provider.web3.eth.requestAccounts();
     const connectedWalletAddress = accounts[0];
     console.log("Confirming employment status for employee address:", employeeAddress);
+    loadingMsg = ElMessage({
+      message: "<div class='flex items-center'><div style='background: rgba(255,255,255,0.2)' class='w-48 md:w-96 h-1.5 overflow-hidden rounded-md'><div style='animation-timing-function:ease-in-out;animation: mymove 3s infinite' class='rounded-md opacity-75 w-48 md:w-96 h-1.5 bg-white'></div></div><div class='ml-3 flex-none'>" + 'Pending' + '</div></div>',
+      type: 'info',
+      duration: 0,
+      dangerouslyUseHTMLString: true
+    })
     await contract.methods.confirmEmploymentStatus(employeeAddress).send({ from: connectedWalletAddress });
     console.log("Employment status confirmed for employee address:", employeeAddress);
+    loadingMsg.close()
+    ElMessage(({
+      message: 'Operation successful',
+      type: 'success'
+    }))
     getEmployeeInformation(); // Refresh employee data after confirmation
   } catch (error) {
+    loadingMsg.close()
+    ElMessage(({
+      message: error,
+      type: 'error'
+    }))
     console.error('Error confirmEmploymentStatus:', error);
   }
 }
@@ -125,10 +141,26 @@ async function confirmClaim(employeeAddress) {
     const accounts = await web3Provider.web3.eth.requestAccounts();
     const connectedWalletAddress = accounts[0];
     console.log("Confirming claim for employee address:", employeeAddress);
+    loadingMsg = ElMessage({
+      message: "<div class='flex items-center'><div style='background: rgba(255,255,255,0.2)' class='w-48 md:w-96 h-1.5 overflow-hidden rounded-md'><div style='animation-timing-function:ease-in-out;animation: mymove 3s infinite' class='rounded-md opacity-75 w-48 md:w-96 h-1.5 bg-white'></div></div><div class='ml-3 flex-none'>" + 'Pending' + '</div></div>',
+      type: 'info',
+      duration: 0,
+      dangerouslyUseHTMLString: true
+    })
     await contract.methods.confirmClaim(employeeAddress).send({ from: connectedWalletAddress });
+    loadingMsg.close()
+    ElMessage(({
+      message: 'Operation successful',
+      type: 'success'
+    }))
     console.log("Claim confirmed for employee address:", employeeAddress);
     getEmployeeInformation(); // Refresh employee data after confirmation
   } catch (error) {
+    loadingMsg.close()
+    ElMessage(({
+      message: error,
+      type: 'error'
+    }))
     console.error('Error confirmClaim:', error);
   }
 }

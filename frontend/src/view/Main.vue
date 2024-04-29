@@ -43,7 +43,7 @@
         </div>
         <div class="flex flex-col items-center">
           <div class="mb-3 text-xl">{{ employeeInfo.data.payout + ' SGD' }}</div>
-          <div @click="handleClaim" :class="{'btn-disabled': employeeInfo.data.status !== 4 || withinThreeMonthsStatus !== 'available'}" class="btn btn-sm my-2">Submit Claim</div>
+          <div @click="handleClaim" :class="{'btn-disabled': !(employeeInfo.data.status === 4 && withinThreeMonthsStatus === 'available' && employeeInfo.data.monthsPaid >= 3)}" class="btn btn-sm my-2">Submit Claim</div>
         </div>
       </div>
 
