@@ -168,7 +168,7 @@ contract UnemploymentInsurance {
         require(companyNameHash != bytes32(0),"User is not a HR!");
         require(msg.sender == companiesByHash[companyNameHash].hrWallet, "Only HR can confirm the claim.");
         Employee storage employee = employees[employeeAddress];
-        checkEnoughWaitingTime(msg.sender);
+        checkEnoughWaitingTime(employeeAddress);
         require(employee.status != 0, "Not Registered!");
         require(employee.status != 1, "Registration not confirmed yet!");
         require(employee.status != 2, "Still in Waiting Period!");

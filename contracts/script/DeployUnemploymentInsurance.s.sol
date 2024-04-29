@@ -15,6 +15,7 @@ contract DeployUnemploymentInsurance is Script {
 
         UnemploymentInsurance insurance = new UnemploymentInsurance();
         insurance.registerCompany("dbs",0x98c54F302b725b306bd1D554b7d23661294f5664);
+        insurance.registerCompany("DBS",0x98c54F302b725b306bd1D554b7d23661294f5664);
         insurance.registerCompany("Tencent",0xB2ccaeaE836b2Dd1Dc8F3dc7c06Fe8Ea95f4aa97);
 
         vm.stopBroadcast();

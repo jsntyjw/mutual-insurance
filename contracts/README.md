@@ -24,7 +24,8 @@ $ forge test -vvv
 
 ##### Sepolia：
 
-0xB07CaA395814FF99EbFb8cb77DF2466B639FCbf5
+###### 24-04-29 12:35
+0x54DBE75c2770B45b2020cc20dD4A5C3c56eCF9De
 
 ### 本地测试节点部署：
 
@@ -73,8 +74,10 @@ $ forge script script/DeployUnemploymentInsurance.s.sol:DeployUnemploymentInsura
 
 ```shell
 $ forge script script/DeployUnemploymentInsurance.s.sol:DeployUnemploymentInsurance `
-    --rpc-url <alchemy申请的节点url> `
+    --rpc-url "https://eth-sepolia.g.alchemy.com/v2/oqzhgk2Pfq0zvSgNrmUlwPzvmu2wxoYg" `
     --private-key <你的私钥，带有0x前缀的字符串> `
+    --verify
+    --verify-url 
     --broadcast -vvv
 
 # --private-key 可以由
