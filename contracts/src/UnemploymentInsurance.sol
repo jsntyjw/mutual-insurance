@@ -138,6 +138,7 @@ contract UnemploymentInsurance {
             employee.paymentTimestamps.push(block.timestamp);
         }
         employee.monthsPaid += months;
+        employee.payout = calculatePayout(employee.monthlySalary);
         checkEnoughWaitingTime(msg.sender);
         emit PremiumPaid(msg.sender, newAmountPaid, block.timestamp);
     }
@@ -296,15 +297,20 @@ contract UnemploymentInsurance {
     }
 
     // Helper function to calculate payout
-    function calculatePayout(uint salary) public pure returns (uint) {
+    function calculatePayout(uint salary) public view returns (uint) {
+        Employee storage employee = employees[msg.sender];
+        uint bonus = 0;
+        if (employee.monthsPaid > 3) {
+            bonus = (employee.monthsPaid - 3) * 50;
+        }
         if (salary <= 2000) {
-            return salary * 50 ether / 100;
+            return (salary * 50 / 100 + bonus) * 1 ether;
         } else if (salary <= 5000) {
-            return salary * 40 ether / 100;
+            return (salary * 40 / 100 + bonus) * 1 ether;
         } else if (salary <= 10000) {
-            return salary * 30 ether / 100;
+            return (salary * 30 / 100 + bonus) * 1 ether;
         } else {
-            return salary * 20 ether / 100;
+            return (salary * 20 / 100 + bonus) * 1 ether;
         }
     }
 
