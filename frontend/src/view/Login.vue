@@ -31,10 +31,10 @@
         <div class="mt-12 flex flex-col text-left">
           <div class="font-bold text-lg">Payout Plan</div>
           <ul class="list-disc pl-5">
-            <li>Tier 1: 50% of the participant's average monthly salary, capped at $1,000 per month</li>
-            <li>Tier 2: 40% of the participant's average monthly salary, capped at $2,000 per month</li>
-            <li>Tier 3: 30% of the participant's average monthly salary, capped at $3,000 per month</li>
-            <li>Tier 4: 20% of the participant's average monthly salary, capped at $4,000 per month</li>
+            <li>Tier 1: 50% of the participant's average monthly salary, capped at $1,000 per month (No bonus included)</li>
+            <li>Tier 2: 40% of the participant's average monthly salary, capped at $2,000 per month (No bonus included)</li>
+            <li>Tier 3: 30% of the participant's average monthly salary, capped at $3,000 per month (No bonus included)</li>
+            <li>Tier 4: 20% of the participant's average monthly salary, capped at $4,000 per month (No bonus included)</li>
           </ul>
         </div>
 
