@@ -12,7 +12,7 @@ contract UnemploymentInsurance {
     // Ethereum Sepolia
     // address SGDTAddress = 0xa5Eeb3661ED2FA716E7DB8A9B8ec5d07274d4a71;
     // OP Sepolia
-    address SGDTAddress = 0xff77f043Aa81eFc1Ac6D008dfdA1D9bCC7a1dCc0
+    address SGDTAddress = 0xff77f043Aa81eFc1Ac6D008dfdA1D9bCC7a1dCc0;
     SGDT SGDToken = SGDT(SGDTAddress);
     // address private SGDTAddress;
     // SGDT SGDToken;
